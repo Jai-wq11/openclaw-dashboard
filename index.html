@@ -751,6 +751,10 @@
                 <span class="nav-icon">✅</span>
                 <span>To-Do List</span>
             </div>
+            <div class="nav-item" data-view="ideas">
+                <span class="nav-icon">💡</span>
+                <span>Ideas</span>
+            </div>
             <div class="sidebar-divider"></div>
             <div class="nav-item" onclick="exportAllData()">
                 <span class="nav-icon">📤</span>
@@ -1043,6 +1047,53 @@
                 </table>
             </div>
 
+            <!-- Ideas View -->
+            <div class="view" id="ideas">
+                <h1>💡 Ideas for the Future</h1>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <input type="text" class="search-bar" id="ideas-search" placeholder="Search ideas..." style="max-width:300px;" oninput="renderIdeas()">
+                    <button class="btn btn-primary" onclick="showAddIdea()">+ Add Idea</button>
+                </div>
+                <div id="ideas-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Idea Modal -->
+    <div class="modal" id="idea-modal">
+        <div class="modal-content" style="max-width:500px">
+            <div class="modal-header">
+                <h2 id="idea-modal-title">Add Idea</h2>
+                <button class="close-btn" onclick="closeModal('idea-modal')">×</button>
+            </div>
+            <form id="idea-form">
+                <input type="hidden" id="idea-id">
+                <div class="form-group">
+                    <label>Idea *</label>
+                    <input type="text" id="idea-text" required placeholder="What's the idea?">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="idea-category">
+                        <option value="General">General</option>
+                        <option value="Product">Product</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Revenue">Revenue</option>
+                        <option value="Hiring">Hiring</option>
+                        <option value="Tools">Tools</option>
+                        <option value="Content">Content</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="idea-notes" rows="3" placeholder="Extra details..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('idea-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1496,6 +1547,7 @@
         function init() {
             loadData();
             initTodos();
+            initIdeas();
             renderCustomers();
             renderEmployees();
             renderResearchEmployees();
@@ -2610,6 +2662,86 @@
 
         // Export/Import All Data
         // ========== TODOS ==========
+        // ===== IDEAS =====
+        let ideas = [];
+
+        function initIdeas() {
+            const saved = localStorage.getItem('ideas');
+            if (saved) ideas = JSON.parse(saved);
+            renderIdeas();
+
+            document.getElementById('idea-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('idea-id').value;
+                const idea = {
+                    id: id ? parseInt(id) : Date.now(),
+                    text: document.getElementById('idea-text').value,
+                    category: document.getElementById('idea-category').value,
+                    notes: document.getElementById('idea-notes').value,
+                    createdAt: id ? (ideas.find(i => i.id === parseInt(id))?.createdAt || new Date().toISOString()) : new Date().toISOString()
+                };
+                if (id) {
+                    const idx = ideas.findIndex(i => i.id === parseInt(id));
+                    ideas[idx] = idea;
+                } else {
+                    ideas.push(idea);
+                }
+                localStorage.setItem('ideas', JSON.stringify(ideas));
+                renderIdeas();
+                closeModal('idea-modal');
+                showToast('Idea saved', 'success');
+            });
+        }
+
+        function renderIdeas() {
+            const search = (document.getElementById('ideas-search')?.value || '').toLowerCase();
+            const filtered = ideas.filter(i => i.text.toLowerCase().includes(search) || (i.notes || '').toLowerCase().includes(search) || i.category.toLowerCase().includes(search));
+            const list = document.getElementById('ideas-list');
+            if (!filtered.length) {
+                list.innerHTML = '<p style="color:#8892b0;text-align:center;padding:2rem;">No ideas yet. Add your first one!</p>';
+                return;
+            }
+            list.innerHTML = filtered.map(i => `
+                <div style="background:#16213e;border:1px solid #0f3460;border-radius:10px;padding:1rem 1.2rem;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <span style="background:#0f3460;padding:2px 8px;border-radius:8px;font-size:0.7rem;color:#e94560;margin-right:8px;">${i.category}</span>
+                        <strong>${i.text}</strong>
+                        ${i.notes ? `<p style="color:#8892b0;font-size:0.85rem;margin:4px 0 0;">${i.notes}</p>` : ''}
+                    </div>
+                    <div style="display:flex;gap:6px;flex-shrink:0;">
+                        <button class="btn btn-secondary btn-sm" onclick="editIdea(${i.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteIdea(${i.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showAddIdea() {
+            document.getElementById('idea-modal-title').textContent = 'Add Idea';
+            document.getElementById('idea-form').reset();
+            document.getElementById('idea-id').value = '';
+            openModal('idea-modal');
+        }
+
+        function editIdea(id) {
+            const idea = ideas.find(i => i.id === id);
+            if (!idea) return;
+            document.getElementById('idea-modal-title').textContent = 'Edit Idea';
+            document.getElementById('idea-id').value = idea.id;
+            document.getElementById('idea-text').value = idea.text;
+            document.getElementById('idea-category').value = idea.category;
+            document.getElementById('idea-notes').value = idea.notes || '';
+            openModal('idea-modal');
+        }
+
+        function deleteIdea(id) {
+            if (!confirm('Delete this idea?')) return;
+            ideas = ideas.filter(i => i.id !== id);
+            localStorage.setItem('ideas', JSON.stringify(ideas));
+            renderIdeas();
+            showToast('Idea deleted', 'success');
+        }
+
         let todos = [];
         let teamMembers = [];
 
@@ -2792,6 +2924,7 @@
                 personal: personal,
                 resources: resources,
                 todos: todos,
+                ideas: ideas,
                 teamMembers: teamMembers,
                 exportDate: new Date().toISOString()
             };
@@ -2823,6 +2956,7 @@
                         if (data.personal) personal = data.personal;
                         if (data.resources) resources = data.resources;
                         if (data.todos) { todos = data.todos; localStorage.setItem('todos', JSON.stringify(todos)); }
+                        if (data.ideas) { ideas = data.ideas; localStorage.setItem('ideas', JSON.stringify(ideas)); }
                         if (data.teamMembers) { teamMembers = data.teamMembers; localStorage.setItem('teamMembers', JSON.stringify(teamMembers)); }
                         
                         saveData();
