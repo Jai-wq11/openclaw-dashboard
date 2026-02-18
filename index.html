@@ -2341,15 +2341,7 @@
                 }
             });
 
-            // Todo due dates
-            todos.forEach(t => {
-                if (t.dueDate === dateStr && !t.done) {
-                    events.push({
-                        type: 'employee',
-                        text: `📋 ${t.task.substring(0, 30)}${t.task.length > 30 ? '...' : ''}`
-                    });
-                }
-            });
+            // Todo due dates — excluded from calendar
 
             return events;
         }
