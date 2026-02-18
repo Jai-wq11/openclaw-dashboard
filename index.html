@@ -1820,18 +1820,21 @@
             const emp = employees.find(e => e.id === id);
             if (!emp || !emp.email) return;
             
-            const dashboardUrl = window.location.href.split('?')[0];
-            const subject = "You're invited to the Team Dashboard";
-            const body = `Hey ${emp.name},\n\nYou've been added to the team! Here's your access to the admin dashboard:\n\n${dashboardUrl}\n\nOpen this link to get full access. Let me know if you have any questions.\n\n— The Team`;
+            const dashboardUrl = 'https://jai-wq11.github.io/openclaw-dashboard/';
+            const msg = `Hey ${emp.name}! Here's your team dashboard access:\n${dashboardUrl}`;
             
-            // Open Gmail compose with pre-filled fields
-            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emp.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.open(gmailUrl, '_blank');
-            
-            emp.access = 'Invited';
-            saveData();
-            renderEmployees();
-            showToast(`Gmail compose opened for ${emp.email} — hit Send!`, 'success');
+            navigator.clipboard.writeText(msg).then(() => {
+                emp.access = 'Invited';
+                saveData();
+                renderEmployees();
+                showToast(`Invite message copied to clipboard! Paste it in WhatsApp/email.`, 'success');
+            }).catch(() => {
+                // Fallback: prompt
+                prompt('Copy this invite message:', msg);
+                emp.access = 'Invited';
+                saveData();
+                renderEmployees();
+            });
         }
 
         function renderEmployeeSkillsSelector(selectedSkills = []) {
