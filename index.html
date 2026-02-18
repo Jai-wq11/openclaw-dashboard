@@ -1,0 +1,2854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Business Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #16213e;
+            padding: 2rem 1rem;
+            border-right: 1px solid #0f3460;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: #e94560;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-item:hover {
+            background: #0f3460;
+        }
+
+        .nav-item.active {
+            background: #0f3460;
+            color: #e94560;
+        }
+
+        .nav-icon {
+            font-size: 1.25rem;
+        }
+
+        .sidebar-divider {
+            border-top: 1px solid #0f3460;
+            margin: 1.5rem 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        /* Dashboard Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #16213e;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #0f3460;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e94560;
+        }
+
+        /* Table */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            padding: 0.75rem;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #e94560;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #d63851;
+        }
+
+        .btn-secondary {
+            background: #0f3460;
+            color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #1a4d7a;
+        }
+
+        .btn-danger {
+            background: #c92a3e;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-badge.active { background: #1a3a2a; color: #4ade80; }
+        .status-badge.invited { background: #1a2a3a; color: #60a5fa; }
+        .status-badge.pending { background: #2a2a1a; color: #facc15; }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Sub-tabs for Employees */
+        .sub-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #0f3460;
+        }
+
+        .sub-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .sub-tab:hover {
+            color: #e0e0e0;
+        }
+
+        .sub-tab.active {
+            color: #e94560;
+            border-bottom-color: #e94560;
+        }
+
+        .sub-tab-content {
+            display: none;
+        }
+
+        .sub-tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #16213e;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #0f3460;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #1a4d7a;
+        }
+
+        td {
+            padding: 1rem;
+            border-top: 1px solid #0f3460;
+        }
+
+        tr:hover {
+            background: #1a2844;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="datetime-local"],
+        input[type="url"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.5rem;
+            background: #1a1a2e;
+            border: 1px solid #0f3460;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 0.875rem;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-content {
+            background: #16213e;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #0f3460;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #888;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .close-btn:hover {
+            color: #e94560;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #888;
+            font-size: 0.875rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #16213e;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #0f3460;
+            z-index: 2000;
+            animation: slideIn 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success {
+            border-left: 4px solid #4caf50;
+        }
+
+        .toast.error {
+            border-left: 4px solid #e94560;
+        }
+
+        /* Calendar */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #0f3460;
+            border: 1px solid #0f3460;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .calendar-day-header {
+            background: #0f3460;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .calendar-day {
+            background: #16213e;
+            padding: 0.75rem;
+            min-height: 100px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .calendar-day:hover {
+            background: #1a2844;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .calendar-event {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin: 0.25rem 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .calendar-event.customer {
+            background: #2196f3;
+        }
+
+        .calendar-event.personal {
+            background: #4caf50;
+        }
+
+        .calendar-event.employee {
+            background: #ff9800;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* Chart */
+        .chart-container {
+            background: #16213e;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #0f3460;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+
+        .chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            gap: 0.5rem;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: #e94560;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s;
+            min-height: 4px;
+        }
+
+        .chart-bar:hover {
+            background: #ff5577;
+        }
+
+        .chart-label {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .chart-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Upcoming Calls */
+        .upcoming-calls {
+            background: #16213e;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #0f3460;
+        }
+
+        .call-item {
+            padding: 1rem;
+            border-left: 3px solid #e94560;
+            margin-bottom: 1rem;
+            background: #1a2844;
+            border-radius: 4px;
+        }
+
+        .call-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .call-time {
+            font-size: 0.875rem;
+            color: #888;
+        }
+
+        .countdown {
+            font-size: 0.875rem;
+            color: #e94560;
+            margin-top: 0.25rem;
+        }
+
+        /* Resources */
+        .resources-section {
+            margin-bottom: 3rem;
+        }
+
+        .resources-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #e94560;
+        }
+
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .resource-card {
+            background: #16213e;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #0f3460;
+            position: relative;
+        }
+
+        .resource-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .resource-description {
+            color: #888;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .resource-link {
+            color: #e94560;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .resource-link:hover {
+            text-decoration: underline;
+        }
+
+        .resource-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .icon-btn:hover {
+            color: #e94560;
+        }
+
+        /* Multi-select */
+        .multi-select {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .multi-select-tag {
+            background: #0f3460;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            color: #e94560;
+        }
+
+        /* File input styling */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+                padding: 1rem 0.5rem;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+
+            .logo {
+                font-size: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-controls {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                max-width: 100%;
+            }
+
+            table {
+                font-size: 0.875rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">🦅 OpenClaw</div>
+            <div class="nav-item active" data-view="dashboard">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-view="customers">
+                <span class="nav-icon">👥</span>
+                <span>Customers</span>
+            </div>
+            <div class="nav-item" data-view="calendar">
+                <span class="nav-icon">📅</span>
+                <span>Calendar</span>
+            </div>
+            <div class="nav-item" data-view="employees">
+                <span class="nav-icon">💼</span>
+                <span>Employees</span>
+            </div>
+            <div class="nav-item" data-view="personal">
+                <span class="nav-icon">🤝</span>
+                <span>Personal</span>
+            </div>
+            <div class="nav-item" data-view="resources">
+                <span class="nav-icon">📚</span>
+                <span>Resources</span>
+            </div>
+            <div class="nav-item" data-view="todos">
+                <span class="nav-icon">✅</span>
+                <span>To-Do List</span>
+            </div>
+            <div class="sidebar-divider"></div>
+            <div class="nav-item" onclick="exportAllData()">
+                <span class="nav-icon">📤</span>
+                <span>Export Data</span>
+            </div>
+            <div class="nav-item" onclick="document.getElementById('import-file-input').click()">
+                <span class="nav-icon">📥</span>
+                <span>Import Data</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div style="display:flex;justify-content:flex-end;padding:10px 20px;gap:10px;">
+                <button class="btn btn-secondary btn-sm" onclick="showAdminPanel()">👥 Team Access</button>
+            </div>
+
+            <!-- Dashboard View -->
+            <div class="view active" id="dashboard">
+                <h1>Dashboard</h1>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Today's Revenue</div>
+                        <div class="stat-value" id="revenue-today">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">This Week</div>
+                        <div class="stat-value" id="revenue-week">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value" id="revenue-month">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">All Time</div>
+                        <div class="stat-value" id="revenue-all">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Clients</div>
+                        <div class="stat-value" id="count-active">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Completed</div>
+                        <div class="stat-value" id="count-completed">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value" id="count-pending">0</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Revenue - Last 7 Days</div>
+                    <div id="revenue-chart"></div>
+                </div>
+
+                <div class="upcoming-calls">
+                    <h2 style="margin-bottom: 1rem;">Upcoming Calls</h2>
+                    <div id="upcoming-calls-list"></div>
+                </div>
+            </div>
+
+            <!-- Customers View -->
+            <div class="view" id="customers">
+                <h1>Customers</h1>
+                
+                <div class="table-controls">
+                    <input type="text" class="search-bar" id="customer-search" placeholder="Search customers...">
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="exportCustomers()">📥 Export CSV</button>
+                        <button class="btn btn-primary" onclick="showAddCustomer()">+ Add Customer</button>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table id="customers-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('customers', 'name')">Name</th>
+                                <th onclick="sortTable('customers', 'useCase')">Use Case</th>
+                                <th onclick="sortTable('customers', 'package')">Package</th>
+                                <th onclick="sortTable('customers', 'price')">Price</th>
+                                <th onclick="sortTable('customers', 'callDate')">Call Date</th>
+                                <th onclick="sortTable('customers', 'timezone')">Timezone</th>
+                                <th onclick="sortTable('customers', 'status')">Status</th>
+                                <th>Paid</th>
+                                <th onclick="sortTable('customers', 'paymentMethod')">Payment Method</th>
+                                <th onclick="sortTable('customers', 'paymentStatus')">Payment Status</th>
+                                <th>Payment Date</th>
+                                <th>Group Chat</th>
+                                <th>Next Call</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="view" id="calendar">
+                <h1>Calendar</h1>
+                <p style="color:#e94560;font-size:0.9rem;margin-bottom:10px;">⏰ All times shown in Hong Kong Time (HKT / GMT+8)</p>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #2196f3;"></div>
+                        <span>Customers</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4caf50;"></div>
+                        <span>Personal</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff9800;"></div>
+                        <span>Employees</span>
+                    </div>
+                </div>
+
+                <div class="calendar-header">
+                    <h2 id="calendar-month-year"></h2>
+                    <div class="calendar-nav">
+                        <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">← Prev</button>
+                        <button class="btn btn-secondary btn-sm" onclick="goToToday()">Today</button>
+                        <button class="btn btn-secondary btn-sm" onclick="changeMonth(1)">Next →</button>
+                    </div>
+                </div>
+
+                <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+
+            <!-- Employees View -->
+            <div class="view" id="employees">
+                <h1>Employees</h1>
+                
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="switchEmployeeTab('active')">Active Employees</button>
+                    <button class="sub-tab" onclick="switchEmployeeTab('research')">Research/Scouting</button>
+                </div>
+
+                <!-- Active Employees Tab -->
+                <div class="sub-tab-content active" id="active-employees-tab">
+                    <div class="table-controls">
+                        <input type="text" class="search-bar" id="employee-search" placeholder="Search employees...">
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-secondary btn-sm" onclick="exportEmployees()">📥 Export CSV</button>
+                            <button class="btn btn-primary" onclick="showAddEmployee()">+ Add Employee</button>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table id="employees-table">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable('employees', 'name')">Name</th>
+                                    <th onclick="sortTable('employees', 'email')">Email</th>
+                                    <th onclick="sortTable('employees', 'contact')">Phone</th>
+                                    <th>Skills</th>
+                                    <th>Assigned Customers</th>
+                                    <th onclick="sortTable('employees', 'timezone')">Timezone</th>
+                                    <th onclick="sortTable('employees', 'availability')">Availability</th>
+                                    <th onclick="sortTable('employees', 'access')">Access</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employees-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Research Employees Tab -->
+                <div class="sub-tab-content" id="research-employees-tab">
+                    <div class="table-controls">
+                        <input type="text" class="search-bar" id="research-search" placeholder="Search research employees...">
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-secondary btn-sm" onclick="exportResearchEmployees()">📥 Export CSV</button>
+                            <button class="btn btn-primary" onclick="showAddResearchEmployee()">+ Add Research Employee</button>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table id="research-employees-table">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable('researchEmployees', 'name')">Name</th>
+                                    <th onclick="sortTable('researchEmployees', 'source')">Source</th>
+                                    <th>Skills</th>
+                                    <th onclick="sortTable('researchEmployees', 'ratePerCall')">Rate Per Call</th>
+                                    <th onclick="sortTable('researchEmployees', 'interviewStatus')">Interview Status</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="research-employees-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal View -->
+            <div class="view" id="personal">
+                <h1>Personal (Friends & Family)</h1>
+                
+                <div class="table-controls">
+                    <input type="text" class="search-bar" id="personal-search" placeholder="Search contacts...">
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="exportPersonal()">📥 Export CSV</button>
+                        <button class="btn btn-primary" onclick="showAddPersonal()">+ Add Contact</button>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table id="personal-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('personal', 'name')">Name</th>
+                                <th onclick="sortTable('personal', 'relationship')">Relationship</th>
+                                <th>Pitch Angle</th>
+                                <th onclick="sortTable('personal', 'status')">Status</th>
+                                <th onclick="sortTable('personal', 'interestLevel')">Interest</th>
+                                <th onclick="sortTable('personal', 'followUpDate')">Follow-up Date</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="personal-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Resources View -->
+            <div class="view" id="resources">
+                <h1>Resources</h1>
+
+                <div style="margin-bottom: 2rem;">
+                    <button class="btn btn-primary" onclick="showAddResource()">+ Add Resource</button>
+                </div>
+
+                <div class="resources-section">
+                    <h2>📋 Customer Resources</h2>
+                    <div class="resource-grid" id="customer-resources"></div>
+                </div>
+
+                <div class="resources-section">
+                    <h2>💼 Employee Resources</h2>
+                    <div class="resource-grid" id="employee-resources"></div>
+                </div>
+
+                <div class="resources-section">
+                    <h2>📚 General Resources</h2>
+                    <div class="resource-grid" id="general-resources"></div>
+                </div>
+            </div>
+            <!-- To-Do List View -->
+            <div class="view" id="todos">
+                <h1>To-Do List</h1>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <div style="display:flex;gap:10px;">
+                        <select id="todo-filter-urgency" onchange="renderTodos()" style="padding:8px;border-radius:6px;background:#16213e;color:white;border:1px solid #0f3460;">
+                            <option value="">All Urgency</option>
+                            <option value="🔴 Critical">🔴 Critical</option>
+                            <option value="🟡 High">🟡 High</option>
+                            <option value="🔵 Medium">🔵 Medium</option>
+                            <option value="⚪ Low">⚪ Low</option>
+                        </select>
+                        <select id="todo-filter-assignee" onchange="renderTodos()" style="padding:8px;border-radius:6px;background:#16213e;color:white;border:1px solid #0f3460;">
+                            <option value="">All Assignees</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="showAddTodo()">+ Add Task</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Done</th>
+                            <th onclick="sortTable('todos', 'urgency')">Urgency</th>
+                            <th onclick="sortTable('todos', 'task')">Task</th>
+                            <th onclick="sortTable('todos', 'assignee')">Assigned To</th>
+                            <th onclick="sortTable('todos', 'dueDate')">Due Date</th>
+                            <th onclick="sortTable('todos', 'status')">Status</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="todos-table"></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="import-file-input" accept=".json" onchange="importAllData(event)">
+
+    <!-- Admin Panel Modal -->
+    <div class="modal" id="admin-modal">
+        <div class="modal-content" style="max-width:500px">
+            <div class="modal-header">
+                <h2>👥 Team Access</h2>
+                <span class="close-modal" onclick="closeModal('admin-modal')">&times;</span>
+            </div>
+            <p style="color:#aaa;margin-bottom:15px;">Share your dashboard data with team members. Export the JSON and send it to them — they import it on their end.</p>
+            <div style="margin-bottom:15px;">
+                <label>Team Members</label>
+                <div id="admin-team-list"></div>
+            </div>
+            <form onsubmit="addTeamMember(event)">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="admin-member-name" required placeholder="e.g. Jaiden">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="admin-member-role">
+                        <option value="Admin">Admin (full access)</option>
+                        <option value="Employee">Employee (view only)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Contact</label>
+                    <input type="text" id="admin-member-contact" placeholder="WhatsApp/Email">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Add Team Member</button>
+            </form>
+            <div style="margin-top:20px;padding-top:15px;border-top:1px solid #0f3460;">
+                <button class="btn btn-secondary" style="width:100%" onclick="exportAllData()">📤 Export Data for Team</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Todo Modal -->
+    <div class="modal" id="todo-modal">
+        <div class="modal-content" style="max-width:500px">
+            <div class="modal-header">
+                <h2 id="todo-modal-title">Add Task</h2>
+                <span class="close-modal" onclick="closeModal('todo-modal')">&times;</span>
+            </div>
+            <form id="todo-form" onsubmit="saveTodo(event)">
+                <input type="hidden" id="todo-id">
+                <div class="form-group">
+                    <label>Task</label>
+                    <input type="text" id="todo-task" required placeholder="What needs to be done?">
+                </div>
+                <div class="form-group">
+                    <label>Urgency</label>
+                    <select id="todo-urgency">
+                        <option value="🔴 Critical">🔴 Critical</option>
+                        <option value="🟡 High">🟡 High</option>
+                        <option value="🔵 Medium">🔵 Medium</option>
+                        <option value="⚪ Low">⚪ Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Assigned To</label>
+                    <select id="todo-assignee">
+                        <option value="Ty">Ty</option>
+                        <option value="Jaiden">Jaiden</option>
+                        <option value="Unassigned">Unassigned</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" id="todo-due-date">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="todo-status">
+                        <option value="To Do">To Do</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Blocked">Blocked</option>
+                        <option value="Done">Done</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="todo-notes" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Save Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Customer Modal -->
+    <div class="modal" id="customer-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="customer-modal-title">Add Customer</h2>
+                <button class="close-btn" onclick="closeModal('customer-modal')">×</button>
+            </div>
+            <form id="customer-form">
+                <input type="hidden" id="customer-id">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Use Case</label>
+                    <input type="text" id="customer-usecase">
+                </div>
+                <div class="form-group">
+                    <label>Package</label>
+                    <select id="customer-package">
+                        <option value="">Select...</option>
+                        <option value="Basic">Basic</option>
+                        <option value="Pro">Pro</option>
+                        <option value="Premium">Premium</option>
+                        <option value="Troubleshoot">Troubleshoot</option>
+                        <option value="Custom">Custom</option>
+                    </select>
+                </div>
+                <div class="form-group" id="custom-package-note-group" style="display:none">
+                    <label>Custom Package Notes</label>
+                    <input type="text" id="customer-custom-package-note" placeholder="Describe custom package...">
+                </div>
+                <div class="form-group">
+                    <label>Needs Another Call</label>
+                    <div style="display:flex;gap:10px;align-items:center">
+                        <input type="checkbox" id="customer-needs-another-call" style="width:auto">
+                        <input type="date" id="customer-next-call-date" placeholder="Next call date" style="flex:1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Price (USD)</label>
+                    <input type="text" id="customer-price" placeholder="e.g., $199 or TBD">
+                </div>
+                <div class="form-group">
+                    <label>Call Date</label>
+                    <input type="datetime-local" id="customer-calldate">
+                </div>
+                <div class="form-group">
+                    <label>Timezone</label>
+                    <select id="customer-timezone">
+                        <option value="">Select...</option>
+                        <option value="EST">EST</option>
+                        <option value="CST">CST</option>
+                        <option value="MST">MST</option>
+                        <option value="PST">PST</option>
+                        <option value="GMT">GMT</option>
+                        <option value="CET">CET</option>
+                        <option value="IST">IST</option>
+                        <option value="AEST">AEST</option>
+                        <option value="JST">JST</option>
+                        <option value="HKT">HKT</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="customer-status">
+                        <option value="New">New</option>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Follow-up">Follow-up</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="customer-paid"> Paid
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="customer-payment-method">
+                        <option value="">Select...</option>
+                        <option value="PayPal">PayPal</option>
+                        <option value="Wise">Wise</option>
+                        <option value="Crypto">Crypto</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Payment Status</label>
+                    <select id="customer-payment-status">
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Payment Date</label>
+                    <input type="date" id="customer-payment-date">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="customer-group-chat-created"> Group Chat Created
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Group Chat Link</label>
+                    <input type="url" id="customer-group-chat-link" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="customer-notes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('customer-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Employee Modal -->
+    <div class="modal" id="employee-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="employee-modal-title">Add Employee</h2>
+                <button class="close-btn" onclick="closeModal('employee-modal')">×</button>
+            </div>
+            <form id="employee-form">
+                <input type="hidden" id="employee-id">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="employee-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="employee-email" placeholder="team@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone/Contact</label>
+                    <input type="text" id="employee-contact">
+                </div>
+                <div class="form-group">
+                    <label>Skills</label>
+                    <div id="employee-skills-container"></div>
+                </div>
+                <div class="form-group">
+                    <label>Assigned Customers</label>
+                    <div id="employee-customers-container"></div>
+                </div>
+                <div class="form-group">
+                    <label>Timezone</label>
+                    <select id="employee-timezone">
+                        <option value="">Select...</option>
+                        <option value="EST (UTC-5)">EST (UTC-5)</option>
+                        <option value="CST (UTC-6)">CST (UTC-6)</option>
+                        <option value="MST (UTC-7)">MST (UTC-7)</option>
+                        <option value="PST (UTC-8)">PST (UTC-8)</option>
+                        <option value="GMT (UTC+0)">GMT (UTC+0)</option>
+                        <option value="CET (UTC+1)">CET (UTC+1)</option>
+                        <option value="IST (UTC+5:30)">IST (UTC+5:30)</option>
+                        <option value="HKT (UTC+8)">HKT (UTC+8)</option>
+                        <option value="JST (UTC+9)">JST (UTC+9)</option>
+                        <option value="AEST (UTC+10)">AEST (UTC+10)</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Availability</label>
+                    <input type="text" id="employee-availability" placeholder="e.g., 10AM-7PM">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="employee-notes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('employee-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Research Employee Modal -->
+    <div class="modal" id="research-employee-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="research-employee-modal-title">Add Research Employee</h2>
+                <button class="close-btn" onclick="closeModal('research-employee-modal')">×</button>
+            </div>
+            <form id="research-employee-form">
+                <input type="hidden" id="research-employee-id">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="research-employee-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Source</label>
+                    <select id="research-employee-source">
+                        <option value="">Select...</option>
+                        <option value="Upwork">Upwork</option>
+                        <option value="Fiverr">Fiverr</option>
+                        <option value="LinkedIn">LinkedIn</option>
+                        <option value="Referral">Referral</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Skills</label>
+                    <input type="text" id="research-employee-skills" placeholder="e.g., AI Automation, n8n, LangChain">
+                </div>
+                <div class="form-group">
+                    <label>Rate Per Call</label>
+                    <input type="text" id="research-employee-rate" placeholder="e.g., $50 or TBD">
+                </div>
+                <div class="form-group">
+                    <label>Interview Status</label>
+                    <select id="research-employee-interview-status">
+                        <option value="Scouted">Scouted</option>
+                        <option value="Contacted">Contacted</option>
+                        <option value="Interviewed">Interviewed</option>
+                        <option value="Hired">Hired</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="research-employee-notes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('research-employee-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Personal Modal -->
+    <div class="modal" id="personal-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="personal-modal-title">Add Contact</h2>
+                <button class="close-btn" onclick="closeModal('personal-modal')">×</button>
+            </div>
+            <form id="personal-form">
+                <input type="hidden" id="personal-id">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="personal-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Relationship</label>
+                    <input type="text" id="personal-relationship">
+                </div>
+                <div class="form-group">
+                    <label>Pitch Angle</label>
+                    <input type="text" id="personal-pitch">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="personal-status">
+                        <option value="Not Contacted">Not Contacted</option>
+                        <option value="Message Sent">Message Sent</option>
+                        <option value="Interested">Interested</option>
+                        <option value="Not Interested">Not Interested</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Interest Level</label>
+                    <select id="personal-interest">
+                        <option value="">Select...</option>
+                        <option value="Hot">Hot</option>
+                        <option value="Warm">Warm</option>
+                        <option value="Cold">Cold</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Follow-up Date</label>
+                    <input type="date" id="personal-followup">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="personal-notes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('personal-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resource Modal -->
+    <div class="modal" id="resource-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="resource-modal-title">Add Resource</h2>
+                <button class="close-btn" onclick="closeModal('resource-modal')">×</button>
+            </div>
+            <form id="resource-form">
+                <input type="hidden" id="resource-id">
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select id="resource-category" required>
+                        <option value="">Select...</option>
+                        <option value="Customer">Customer Resources</option>
+                        <option value="Employee">Employee Resources</option>
+                        <option value="General">General Resources</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="resource-title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="resource-description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL/Link</label>
+                    <input type="text" id="resource-url">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('resource-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let customers = [];
+        let employees = [];
+        let researchEmployees = [];
+        let personal = [];
+        let resources = [];
+        let currentCalendarDate = new Date();
+
+        const SKILLS_OPTIONS = [
+            'OpenClaw Setup',
+            'Security Hardening',
+            'Gmail Config',
+            'Model Routing',
+            'Docker',
+            'Multi-Agent',
+            'Troubleshooting'
+        ];
+
+        // Initialize
+        function init() {
+            loadData();
+            initTodos();
+            renderCustomers();
+            renderEmployees();
+            renderResearchEmployees();
+            renderPersonal();
+            renderResources();
+            renderTodos();
+            renderDashboard();
+            renderCalendar();
+            setupNavigation();
+            setupSearch();
+            setupForms();
+            startCountdown();
+        }
+
+        // Load/Save Data
+        function loadData() {
+            const savedCustomers = localStorage.getItem('customers');
+            const savedEmployees = localStorage.getItem('employees');
+            const savedResearchEmployees = localStorage.getItem('researchEmployees');
+            const savedPersonal = localStorage.getItem('personal');
+            const savedResources = localStorage.getItem('resources');
+
+            if (savedCustomers) {
+                customers = JSON.parse(savedCustomers);
+                // Ensure all customers have new fields
+                customers = customers.map(c => ({
+                    ...c,
+                    paymentMethod: c.paymentMethod || '',
+                    paymentStatus: c.paymentStatus || 'Unpaid',
+                    paymentDate: c.paymentDate || '',
+                    groupChatCreated: c.groupChatCreated || false,
+                    groupChatLink: c.groupChatLink || ''
+                }));
+            } else {
+                // Pre-populate customers with new fields
+                customers = [
+                    {id: 1, name: 'Ryan Hanley', useCase: 'Podcast Producer AI', package: 'Pro', price: 'TBD', callDate: '2026-02-17T19:00', timezone: 'EST', status: 'Completed', notes: 'Rate limits + browser issues', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 2, name: 'K J (Kris Johnson)', useCase: 'Fullstack Dev + AI Agents', package: 'Pro', price: '$199', callDate: '2026-02-18T09:00', timezone: 'CET', status: 'In Progress', notes: 'Ubuntu. Instagram analytics + AI phone bot', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 3, name: 'Darach Gannon', useCase: 'Fresh Install + Gmail + Memory', package: 'Pro', price: '$199', callDate: '2026-02-19T13:00', timezone: 'GMT', status: 'Scheduled', notes: 'Mac Mini. Ireland. ChatGPT broke config', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 4, name: 'Elmer Peysakhov', useCase: 'Real Estate Acquisitions', package: 'Basic/Pro', price: '$50-100', callDate: '', timezone: '', status: 'Follow-up', notes: 'Multifamily/Commercial RE', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 5, name: 'Indrayudh', useCase: 'Lead Gen AI Organisation', package: 'Pro', price: '$249', callDate: '', timezone: '', status: 'Follow-up', notes: 'Wants multiple AI employees', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 6, name: 'Yagyesh Jaiswal', useCase: 'X Ghostwriter + API Costs', package: 'Troubleshoot', price: '$49', callDate: '', timezone: '', status: 'Follow-up', notes: 'Has Clawdbot Pro. India', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 7, name: 'Gourzong Realty Group', useCase: 'Personal Tasks + Video + Apps', package: 'Basic', price: '$149', callDate: '', timezone: '', status: 'Cancelled', notes: 'Had Claude Max. Something came up', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 8, name: 'Vlad Iorga CBT', useCase: 'Unknown', package: 'TBD', price: 'TBD', callDate: '', timezone: '', status: 'Follow-up', notes: 'Was driving. No details yet', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 9, name: 'Naeem Miller', useCase: 'Starting from Scratch', package: 'Pro', price: '$200', callDate: '', timezone: '', status: 'Follow-up', notes: 'Mac Mini, wiped twice, Homebrew issues', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 10, name: 'Ali Howard', useCase: 'Starting from Scratch', package: 'TBD', price: 'TBD', callDate: '', timezone: '', status: 'New', notes: 'Booked on website', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 11, name: 'Eli', useCase: 'Ecommerce Personal Assistant', package: 'Basic', price: '$99', callDate: '', timezone: '', status: 'Follow-up', notes: 'Ecommerce company. Non-technical. UK GMT', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''},
+                    {id: 12, name: 'Daan B', useCase: 'Venice/Llama function calling', package: 'N/A', price: 'N/A', callDate: '', timezone: '', status: 'Closed', notes: 'Switched to Claude Sonnet. Doesn\'t need help', paid: false, paymentMethod: '', paymentStatus: 'Unpaid', paymentDate: '', groupChatCreated: false, groupChatLink: ''}
+                ];
+                saveData();
+            }
+
+            if (savedEmployees) {
+                employees = JSON.parse(savedEmployees);
+            } else {
+                employees = [
+                    {id: 1, name: 'Jaiden', contact: 'Partner', skills: ['OpenClaw Setup', 'Gmail Config', 'Model Routing'], assignedCustomers: [], availability: 'Available 10AM-7PM EST', notes: ''}
+                ];
+                saveData();
+            }
+
+            if (savedResearchEmployees) {
+                researchEmployees = JSON.parse(savedResearchEmployees);
+            } else {
+                // Pre-populate research employees
+                researchEmployees = [
+                    {id: 1, name: 'Abhishek V.', source: 'Upwork', skills: 'AI Automation, n8n, LangChain', ratePerCall: 'TBD', interviewStatus: 'Contacted', notes: ''},
+                    {id: 2, name: 'Muhammad', source: 'Upwork', skills: 'OpenClaw Setup', ratePerCall: 'TBD', interviewStatus: 'Contacted', notes: ''}
+                ];
+                saveData();
+            }
+
+            if (savedPersonal) {
+                personal = JSON.parse(savedPersonal);
+            } else {
+                personal = [
+                    {id: 1, name: 'Xunyoung Wang', relationship: 'Tennis buddy', pitchAngle: 'HKEx filings + kids schedules', status: 'Not Contacted', interestLevel: 'Warm', followUpDate: '', notes: ''},
+                    {id: 2, name: 'Feng Hsiung', relationship: 'Contact', pitchAngle: 'Multi-entity briefings + kids', status: 'Not Contacted', interestLevel: 'Warm', followUpDate: '', notes: ''},
+                    {id: 3, name: 'Yewen/Yian Wang', relationship: 'Contact', pitchAngle: 'Personal automation + kids', status: 'Message Sent', interestLevel: 'Interested', followUpDate: '', notes: ''},
+                    {id: 4, name: 'Alvin Wong', relationship: 'Contact', pitchAngle: 'Construction automation', status: 'Message Sent', interestLevel: 'Interested', followUpDate: '', notes: ''},
+                    {id: 5, name: 'Mr Ho', relationship: 'Tennis buddy', pitchAngle: 'Tennis coaching', status: 'Message Sent', interestLevel: 'Hot', followUpDate: '', notes: ''},
+                    {id: 6, name: 'Ezra Dweck', relationship: 'Contact (warmest)', pitchAngle: 'AI automation', status: 'Not Contacted', interestLevel: 'Warm', followUpDate: '', notes: ''},
+                    {id: 7, name: 'Dean Cooper', relationship: 'Contact', pitchAngle: 'Dual CEO/COO', status: 'Not Contacted', interestLevel: 'Cold', followUpDate: '', notes: ''},
+                    {id: 8, name: 'Thomas Ekberg', relationship: 'Contact', pitchAngle: 'AI automation', status: 'Not Contacted', interestLevel: 'Cold', followUpDate: '', notes: ''},
+                    {id: 9, name: 'Aaron Yuan', relationship: 'Contact', pitchAngle: 'Goldman MD', status: 'Not Contacted', interestLevel: 'Cold', followUpDate: '', notes: ''},
+                    {id: 10, name: 'Philippe El-Asmar', relationship: 'Contact', pitchAngle: 'AI automation', status: 'Not Contacted', interestLevel: 'Cold', followUpDate: '', notes: ''},
+                    {id: 11, name: 'Neal Goldman', relationship: 'Contact', pitchAngle: 'AI automation', status: 'Not Contacted', interestLevel: 'Cold', followUpDate: '', notes: ''},
+                    {id: 12, name: 'Jason Sankey', relationship: 'Contact', pitchAngle: 'AI automation', status: 'Not Contacted', interestLevel: 'Cold', followUpDate: '', notes: ''},
+                    {id: 13, name: 'Tim Stephens', relationship: 'Contact', pitchAngle: 'AI automation', status: 'Not Contacted', interestLevel: 'Cold', followUpDate: '', notes: ''}
+                ];
+                saveData();
+            }
+
+            if (savedResources) {
+                resources = JSON.parse(savedResources);
+            } else {
+                resources = [
+                    {id: 1, category: 'Customer', title: 'Setup Checklist', description: 'Step-by-step for client calls', url: ''},
+                    {id: 2, category: 'Customer', title: 'Gmail API Setup Guide', description: 'Google Cloud Console walkthrough', url: ''},
+                    {id: 3, category: 'Customer', title: 'Brave Search API Setup', description: 'API key configuration', url: ''},
+                    {id: 4, category: 'Employee', title: 'Interview Questions', description: '12 questions for hiring A-players', url: ''},
+                    {id: 5, category: 'Employee', title: 'Client Brief Template', description: 'How to write client briefs', url: ''},
+                    {id: 6, category: 'General', title: 'Pricing Guide', description: 'Basic $99 / Pro $199 / Premium $249', url: ''}
+                ];
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('customers', JSON.stringify(customers));
+            localStorage.setItem('employees', JSON.stringify(employees));
+            localStorage.setItem('researchEmployees', JSON.stringify(researchEmployees));
+            localStorage.setItem('personal', JSON.stringify(personal));
+            localStorage.setItem('resources', JSON.stringify(resources));
+        }
+
+        // Navigation
+        function setupNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.dataset.view) {
+                    item.addEventListener('click', () => {
+                        const view = item.dataset.view;
+                        
+                        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        
+                        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                        document.getElementById(view).classList.add('active');
+
+                        if (view === 'calendar') renderCalendar();
+                        if (view === 'dashboard') renderDashboard();
+                    });
+                }
+            });
+        }
+
+        // Sub-tabs for Employees
+        function switchEmployeeTab(tab) {
+            document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'active') {
+                document.querySelectorAll('.sub-tab')[0].classList.add('active');
+                document.getElementById('active-employees-tab').classList.add('active');
+            } else if (tab === 'research') {
+                document.querySelectorAll('.sub-tab')[1].classList.add('active');
+                document.getElementById('research-employees-tab').classList.add('active');
+            }
+        }
+
+        // Customers
+        function renderCustomers() {
+            const tbody = document.getElementById('customers-tbody');
+            const search = document.getElementById('customer-search').value.toLowerCase();
+            
+            const filtered = customers.filter(c => 
+                c.name.toLowerCase().includes(search) ||
+                c.useCase.toLowerCase().includes(search) ||
+                c.status.toLowerCase().includes(search)
+            );
+
+            tbody.innerHTML = filtered.map(c => `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>${c.useCase}</td>
+                    <td>${c.package}</td>
+                    <td>${c.price}</td>
+                    <td>${c.callDate ? new Date(c.callDate).toLocaleString() : 'TBD'}</td>
+                    <td>${c.timezone}</td>
+                    <td><span style="padding: 0.25rem 0.75rem; border-radius: 4px; background: ${getStatusColor(c.status)}; font-size: 0.875rem;">${c.status}</span></td>
+                    <td><input type="checkbox" ${c.paid ? 'checked' : ''} onchange="togglePaid(${c.id})"></td>
+                    <td>${c.paymentMethod || '-'}</td>
+                    <td><span style="padding: 0.25rem 0.75rem; border-radius: 4px; background: ${getPaymentStatusColor(c.paymentStatus)}; font-size: 0.875rem;">${c.paymentStatus}</span></td>
+                    <td>${c.paymentDate || '-'}</td>
+                    <td>
+                        ${c.groupChatCreated ? (c.groupChatLink ? `<a href="${c.groupChatLink}" target="_blank" style="color: #4caf50;">✅</a>` : '✅') : '❌'}
+                    </td>
+                    <td>${c.needsAnotherCall ? `<span style="color:#e94560">🔄 ${c.nextCallDate || 'TBD'}</span>` : '-'}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${c.notes}${c.customPackageNote ? `<br><small style="color:#e94560">Custom: ${c.customPackageNote}</small>` : ''}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="editCustomer(${c.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCustomer(${c.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'New': '#2196f3',
+                'Scheduled': '#ff9800',
+                'In Progress': '#ffc107',
+                'Completed': '#4caf50',
+                'Cancelled': '#f44336',
+                'Follow-up': '#9c27b0',
+                'Closed': '#607d8b'
+            };
+            return colors[status] || '#666';
+        }
+
+        function getPaymentStatusColor(status) {
+            const colors = {
+                'Unpaid': '#f44336',
+                'Pending': '#ff9800',
+                'Paid': '#4caf50'
+            };
+            return colors[status] || '#666';
+        }
+
+        // Custom package toggle
+        document.getElementById('customer-package').addEventListener('change', function() {
+            document.getElementById('custom-package-note-group').style.display = this.value === 'Custom' ? 'block' : 'none';
+        });
+
+        function showAddCustomer() {
+            document.getElementById('customer-modal-title').textContent = 'Add Customer';
+            document.getElementById('customer-form').reset();
+            document.getElementById('customer-id').value = '';
+            document.getElementById('customer-payment-status').value = 'Unpaid';
+            document.getElementById('custom-package-note-group').style.display = 'none';
+            openModal('customer-modal');
+        }
+
+        function editCustomer(id) {
+            const customer = customers.find(c => c.id === id);
+            if (!customer) return;
+
+            document.getElementById('customer-modal-title').textContent = 'Edit Customer';
+            document.getElementById('customer-id').value = customer.id;
+            document.getElementById('customer-name').value = customer.name;
+            document.getElementById('customer-usecase').value = customer.useCase;
+            document.getElementById('customer-package').value = customer.package;
+            document.getElementById('customer-price').value = customer.price;
+            document.getElementById('customer-calldate').value = customer.callDate;
+            document.getElementById('customer-timezone').value = customer.timezone;
+            document.getElementById('customer-status').value = customer.status;
+            document.getElementById('customer-notes').value = customer.notes;
+            document.getElementById('customer-paid').checked = customer.paid;
+            document.getElementById('customer-payment-method').value = customer.paymentMethod || '';
+            document.getElementById('customer-payment-status').value = customer.paymentStatus || 'Unpaid';
+            document.getElementById('customer-payment-date').value = customer.paymentDate || '';
+            document.getElementById('customer-group-chat-created').checked = customer.groupChatCreated || false;
+            document.getElementById('customer-group-chat-link').value = customer.groupChatLink || '';
+            document.getElementById('customer-needs-another-call').checked = customer.needsAnotherCall || false;
+            document.getElementById('customer-next-call-date').value = customer.nextCallDate || '';
+            document.getElementById('customer-custom-package-note').value = customer.customPackageNote || '';
+            document.getElementById('custom-package-note-group').style.display = customer.package === 'Custom' ? 'block' : 'none';
+            
+            openModal('customer-modal');
+        }
+
+        function deleteCustomer(id) {
+            if (!confirm('Are you sure you want to delete this customer?')) return;
+            customers = customers.filter(c => c.id !== id);
+            saveData();
+            renderCustomers();
+            renderDashboard();
+            showToast('Customer deleted', 'success');
+        }
+
+        function togglePaid(id) {
+            const customer = customers.find(c => c.id === id);
+            if (customer) {
+                customer.paid = !customer.paid;
+                saveData();
+                renderDashboard();
+            }
+        }
+
+        // Employees
+        function renderEmployees() {
+            const tbody = document.getElementById('employees-tbody');
+            const search = document.getElementById('employee-search').value.toLowerCase();
+            
+            const filtered = employees.filter(e => 
+                e.name.toLowerCase().includes(search) ||
+                e.contact.toLowerCase().includes(search)
+            );
+
+            tbody.innerHTML = filtered.map(e => `
+                <tr>
+                    <td>${e.name}</td>
+                    <td>${e.email || ''}</td>
+                    <td>${e.contact}</td>
+                    <td>${e.skills.join(', ')}</td>
+                    <td>${e.assignedCustomers.map(id => {
+                        const c = customers.find(cust => cust.id === id);
+                        return c ? c.name : '';
+                    }).filter(n => n).join(', ')}</td>
+                    <td>${e.timezone || ''}</td>
+                    <td>${e.availability}</td>
+                    <td><span class="status-badge ${(e.access || 'pending').toLowerCase()}">${e.access || 'Pending'}</span></td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${e.notes}</td>
+                    <td style="white-space: nowrap;">
+                        ${e.email && e.access !== 'Active' ? `<button class="btn btn-primary btn-sm" onclick="sendInvite(${e.id})" title="Send Invite">📧</button>` : ''}
+                        <button class="btn btn-secondary btn-sm" onclick="editEmployee(${e.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteEmployee(${e.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showAddEmployee() {
+            document.getElementById('employee-modal-title').textContent = 'Add Employee';
+            document.getElementById('employee-form').reset();
+            document.getElementById('employee-id').value = '';
+            renderEmployeeSkillsSelector([]);
+            renderEmployeeCustomersSelector([]);
+            openModal('employee-modal');
+        }
+
+        function editEmployee(id) {
+            const employee = employees.find(e => e.id === id);
+            if (!employee) return;
+
+            document.getElementById('employee-modal-title').textContent = 'Edit Employee';
+            document.getElementById('employee-id').value = employee.id;
+            document.getElementById('employee-name').value = employee.name;
+            document.getElementById('employee-email').value = employee.email || '';
+            document.getElementById('employee-contact').value = employee.contact;
+            document.getElementById('employee-timezone').value = employee.timezone || '';
+            document.getElementById('employee-availability').value = employee.availability;
+            document.getElementById('employee-notes').value = employee.notes;
+            
+            renderEmployeeSkillsSelector(employee.skills);
+            renderEmployeeCustomersSelector(employee.assignedCustomers);
+            
+            openModal('employee-modal');
+        }
+
+        function deleteEmployee(id) {
+            if (!confirm('Are you sure you want to delete this employee?')) return;
+            employees = employees.filter(e => e.id !== id);
+            saveData();
+            renderEmployees();
+            showToast('Employee deleted', 'success');
+        }
+
+        function sendInvite(id) {
+            const emp = employees.find(e => e.id === id);
+            if (!emp || !emp.email) return;
+            
+            const dashboardUrl = window.location.href.split('?')[0];
+            const subject = "You're invited to the Team Dashboard";
+            const body = `Hey ${emp.name},\n\nYou've been added to the team! Here's your access to the admin dashboard:\n\n${dashboardUrl}\n\nOpen this link to get full access. Let me know if you have any questions.\n\n— The Team`;
+            
+            // Open Gmail compose with pre-filled fields
+            const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emp.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(gmailUrl, '_blank');
+            
+            emp.access = 'Invited';
+            saveData();
+            renderEmployees();
+            showToast(`Gmail compose opened for ${emp.email} — hit Send!`, 'success');
+        }
+
+        function renderEmployeeSkillsSelector(selectedSkills = []) {
+            const container = document.getElementById('employee-skills-container');
+            container.innerHTML = SKILLS_OPTIONS.map(skill => `
+                <label style="display: block; margin: 0.5rem 0;">
+                    <input type="checkbox" value="${skill}" ${selectedSkills.includes(skill) ? 'checked' : ''}> ${skill}
+                </label>
+            `).join('');
+        }
+
+        function renderEmployeeCustomersSelector(selectedCustomers = []) {
+            const container = document.getElementById('employee-customers-container');
+            container.innerHTML = customers.map(c => `
+                <label style="display: block; margin: 0.5rem 0;">
+                    <input type="checkbox" value="${c.id}" ${selectedCustomers.includes(c.id) ? 'checked' : ''}> ${c.name}
+                </label>
+            `).join('');
+        }
+
+        // Research Employees
+        function renderResearchEmployees() {
+            const tbody = document.getElementById('research-employees-tbody');
+            const search = document.getElementById('research-search').value.toLowerCase();
+            
+            const filtered = researchEmployees.filter(e => 
+                e.name.toLowerCase().includes(search) ||
+                e.source.toLowerCase().includes(search) ||
+                e.skills.toLowerCase().includes(search)
+            );
+
+            tbody.innerHTML = filtered.map(e => `
+                <tr>
+                    <td>${e.name}</td>
+                    <td>${e.source}</td>
+                    <td>${e.skills}</td>
+                    <td>${e.ratePerCall}</td>
+                    <td><span style="padding: 0.25rem 0.75rem; border-radius: 4px; background: ${getInterviewStatusColor(e.interviewStatus)}; font-size: 0.875rem;">${e.interviewStatus}</span></td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${e.notes}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="editResearchEmployee(${e.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteResearchEmployee(${e.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getInterviewStatusColor(status) {
+            const colors = {
+                'Scouted': '#2196f3',
+                'Contacted': '#ff9800',
+                'Interviewed': '#ffc107',
+                'Hired': '#4caf50',
+                'Rejected': '#f44336'
+            };
+            return colors[status] || '#666';
+        }
+
+        function showAddResearchEmployee() {
+            document.getElementById('research-employee-modal-title').textContent = 'Add Research Employee';
+            document.getElementById('research-employee-form').reset();
+            document.getElementById('research-employee-id').value = '';
+            document.getElementById('research-employee-interview-status').value = 'Scouted';
+            openModal('research-employee-modal');
+        }
+
+        function editResearchEmployee(id) {
+            const employee = researchEmployees.find(e => e.id === id);
+            if (!employee) return;
+
+            document.getElementById('research-employee-modal-title').textContent = 'Edit Research Employee';
+            document.getElementById('research-employee-id').value = employee.id;
+            document.getElementById('research-employee-name').value = employee.name;
+            document.getElementById('research-employee-source').value = employee.source;
+            document.getElementById('research-employee-skills').value = employee.skills;
+            document.getElementById('research-employee-rate').value = employee.ratePerCall;
+            document.getElementById('research-employee-interview-status').value = employee.interviewStatus;
+            document.getElementById('research-employee-notes').value = employee.notes;
+            
+            openModal('research-employee-modal');
+        }
+
+        function deleteResearchEmployee(id) {
+            if (!confirm('Are you sure you want to delete this research employee?')) return;
+            researchEmployees = researchEmployees.filter(e => e.id !== id);
+            saveData();
+            renderResearchEmployees();
+            showToast('Research employee deleted', 'success');
+        }
+
+        // Personal
+        function renderPersonal() {
+            const tbody = document.getElementById('personal-tbody');
+            const search = document.getElementById('personal-search').value.toLowerCase();
+            
+            const filtered = personal.filter(p => 
+                p.name.toLowerCase().includes(search) ||
+                p.relationship.toLowerCase().includes(search) ||
+                p.status.toLowerCase().includes(search)
+            );
+
+            tbody.innerHTML = filtered.map(p => `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.relationship}</td>
+                    <td>${p.pitchAngle}</td>
+                    <td><span style="padding: 0.25rem 0.75rem; border-radius: 4px; background: ${getStatusColor(p.status)}; font-size: 0.875rem;">${p.status}</span></td>
+                    <td><span style="padding: 0.25rem 0.75rem; border-radius: 4px; background: ${getInterestColor(p.interestLevel)}; font-size: 0.875rem;">${p.interestLevel}</span></td>
+                    <td>${p.followUpDate || 'Not set'}</td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${p.notes}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="editPersonal(${p.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deletePersonal(${p.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getInterestColor(level) {
+            const colors = {
+                'Hot': '#ff5722',
+                'Warm': '#ff9800',
+                'Cold': '#2196f3'
+            };
+            return colors[level] || '#666';
+        }
+
+        function showAddPersonal() {
+            document.getElementById('personal-modal-title').textContent = 'Add Contact';
+            document.getElementById('personal-form').reset();
+            document.getElementById('personal-id').value = '';
+            openModal('personal-modal');
+        }
+
+        function editPersonal(id) {
+            const person = personal.find(p => p.id === id);
+            if (!person) return;
+
+            document.getElementById('personal-modal-title').textContent = 'Edit Contact';
+            document.getElementById('personal-id').value = person.id;
+            document.getElementById('personal-name').value = person.name;
+            document.getElementById('personal-relationship').value = person.relationship;
+            document.getElementById('personal-pitch').value = person.pitchAngle;
+            document.getElementById('personal-status').value = person.status;
+            document.getElementById('personal-interest').value = person.interestLevel;
+            document.getElementById('personal-followup').value = person.followUpDate;
+            document.getElementById('personal-notes').value = person.notes;
+            
+            openModal('personal-modal');
+        }
+
+        function deletePersonal(id) {
+            if (!confirm('Are you sure you want to delete this contact?')) return;
+            personal = personal.filter(p => p.id !== id);
+            saveData();
+            renderPersonal();
+            showToast('Contact deleted', 'success');
+        }
+
+        // Resources
+        function renderResources() {
+            const customerContainer = document.getElementById('customer-resources');
+            const employeeContainer = document.getElementById('employee-resources');
+            const generalContainer = document.getElementById('general-resources');
+
+            const customerResources = resources.filter(r => r.category === 'Customer');
+            const employeeResources = resources.filter(r => r.category === 'Employee');
+            const generalResources = resources.filter(r => r.category === 'General');
+
+            customerContainer.innerHTML = customerResources.map(r => renderResourceCard(r)).join('');
+            employeeContainer.innerHTML = employeeResources.map(r => renderResourceCard(r)).join('');
+            generalContainer.innerHTML = generalResources.map(r => renderResourceCard(r)).join('');
+        }
+
+        function renderResourceCard(r) {
+            return `
+                <div class="resource-card">
+                    <div class="resource-actions">
+                        <button class="icon-btn" onclick="editResource(${r.id})">✏️</button>
+                        <button class="icon-btn" onclick="deleteResource(${r.id})">🗑️</button>
+                    </div>
+                    <div class="resource-title">${r.title}</div>
+                    <div class="resource-description">${r.description}</div>
+                    ${r.url ? `<a href="${r.url}" class="resource-link" target="_blank">Open Link →</a>` : ''}
+                </div>
+            `;
+        }
+
+        function showAddResource() {
+            document.getElementById('resource-modal-title').textContent = 'Add Resource';
+            document.getElementById('resource-form').reset();
+            document.getElementById('resource-id').value = '';
+            openModal('resource-modal');
+        }
+
+        function editResource(id) {
+            const resource = resources.find(r => r.id === id);
+            if (!resource) return;
+
+            document.getElementById('resource-modal-title').textContent = 'Edit Resource';
+            document.getElementById('resource-id').value = resource.id;
+            document.getElementById('resource-category').value = resource.category;
+            document.getElementById('resource-title').value = resource.title;
+            document.getElementById('resource-description').value = resource.description;
+            document.getElementById('resource-url').value = resource.url;
+            
+            openModal('resource-modal');
+        }
+
+        function deleteResource(id) {
+            if (!confirm('Are you sure you want to delete this resource?')) return;
+            resources = resources.filter(r => r.id !== id);
+            saveData();
+            renderResources();
+            showToast('Resource deleted', 'success');
+        }
+
+        // Dashboard
+        function renderDashboard() {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            let revenueToday = 0, revenueWeek = 0, revenueMonth = 0, revenueAll = 0;
+            let activeCount = 0, completedCount = 0, pendingCount = 0;
+
+            customers.forEach(c => {
+                const price = parsePrice(c.price);
+                if (price > 0 && c.paid) {
+                    revenueAll += price;
+                    
+                    if (c.callDate) {
+                        const callDate = new Date(c.callDate);
+                        if (callDate >= today) revenueToday += price;
+                        if (callDate >= weekAgo) revenueWeek += price;
+                        if (callDate >= monthStart) revenueMonth += price;
+                    }
+                }
+
+                if (c.status === 'In Progress' || c.status === 'Scheduled') activeCount++;
+                if (c.status === 'Completed') completedCount++;
+                if (c.status === 'New' || c.status === 'Follow-up') pendingCount++;
+            });
+
+            document.getElementById('revenue-today').textContent = '$' + revenueToday;
+            document.getElementById('revenue-week').textContent = '$' + revenueWeek;
+            document.getElementById('revenue-month').textContent = '$' + revenueMonth;
+            document.getElementById('revenue-all').textContent = '$' + revenueAll;
+            document.getElementById('count-active').textContent = activeCount;
+            document.getElementById('count-completed').textContent = completedCount;
+            document.getElementById('count-pending').textContent = pendingCount;
+
+            renderRevenueChart();
+            renderUpcomingCalls();
+        }
+
+        function parsePrice(priceStr) {
+            if (!priceStr || priceStr === 'TBD' || priceStr === 'N/A') return 0;
+            const match = priceStr.match(/\d+/);
+            return match ? parseInt(match[0]) : 0;
+        }
+
+        function renderRevenueChart() {
+            const container = document.getElementById('revenue-chart');
+            const days = [];
+            const now = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+                days.push(date);
+            }
+
+            const data = days.map(day => {
+                let revenue = 0;
+                const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+                const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+
+                customers.forEach(c => {
+                    if (c.paid && c.callDate) {
+                        const callDate = new Date(c.callDate);
+                        if (callDate >= dayStart && callDate < dayEnd) {
+                            revenue += parsePrice(c.price);
+                        }
+                    }
+                });
+
+                return {
+                    date: day,
+                    revenue: revenue,
+                    label: day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                };
+            });
+
+            const maxRevenue = Math.max(...data.map(d => d.revenue), 100);
+
+            container.innerHTML = `
+                <div class="chart">
+                    ${data.map(d => `
+                        <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                            <div class="chart-bar" style="height: ${(d.revenue / maxRevenue) * 100}%;">
+                                ${d.revenue > 0 ? `<div class="chart-value">$${d.revenue}</div>` : ''}
+                            </div>
+                            <div class="chart-label">${d.label}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderUpcomingCalls() {
+            const container = document.getElementById('upcoming-calls-list');
+            const now = new Date();
+            
+            const upcoming = customers
+                .filter(c => c.callDate && new Date(c.callDate) > now)
+                .sort((a, b) => new Date(a.callDate) - new Date(b.callDate))
+                .slice(0, 3);
+
+            if (upcoming.length === 0) {
+                container.innerHTML = '<p style="color: #888;">No upcoming calls scheduled</p>';
+                return;
+            }
+
+            container.innerHTML = upcoming.map(c => {
+                const callDate = new Date(c.callDate);
+                return `
+                    <div class="call-item">
+                        <div class="call-name">${c.name}</div>
+                        <div class="call-time">${callDate.toLocaleString()} ${c.timezone}</div>
+                        <div class="countdown" data-date="${c.callDate}">Calculating...</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function startCountdown() {
+            setInterval(() => {
+                document.querySelectorAll('.countdown').forEach(el => {
+                    const targetDate = new Date(el.dataset.date);
+                    const now = new Date();
+                    const diff = targetDate - now;
+
+                    if (diff <= 0) {
+                        el.textContent = 'Started';
+                        return;
+                    }
+
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                    if (days > 0) {
+                        el.textContent = `In ${days}d ${hours}h ${minutes}m`;
+                    } else if (hours > 0) {
+                        el.textContent = `In ${hours}h ${minutes}m`;
+                    } else {
+                        el.textContent = `In ${minutes}m`;
+                    }
+                });
+            }, 1000);
+        }
+
+        // Calendar
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            document.getElementById('calendar-month-year').textContent = 
+                currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            // Headers
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+
+            // Previous month days
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            for (let i = startDay - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.innerHTML = `<div class="calendar-day-number">${prevMonthDays - i}</div>`;
+                grid.appendChild(day);
+            }
+
+            // Current month days
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                
+                const currentDate = new Date(year, month, i);
+                const events = getEventsForDate(currentDate);
+                
+                day.innerHTML = `
+                    <div class="calendar-day-number">${i}</div>
+                    ${events.map(e => `<div class="calendar-event ${e.type}">${e.text}</div>`).join('')}
+                `;
+                
+                if (events.length > 0) {
+                    day.style.cursor = 'pointer';
+                    day.onclick = () => showDayDetail(currentDate, events);
+                }
+                
+                grid.appendChild(day);
+            }
+
+            // Next month days
+            const remainingDays = 42 - (startDay + daysInMonth);
+            for (let i = 1; i <= remainingDays; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.innerHTML = `<div class="calendar-day-number">${i}</div>`;
+                grid.appendChild(day);
+            }
+        }
+
+        function showDayDetail(date, events) {
+            const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            const eventsHtml = events.map(e => {
+                const colors = { customer: '#0f3460', personal: '#1a472a', employee: '#4a3000' };
+                return `<div style="padding: 10px; margin: 8px 0; border-radius: 8px; background: ${colors[e.type] || '#16213e'}; border-left: 4px solid ${e.type === 'customer' ? '#4a90d9' : e.type === 'personal' ? '#4caf50' : '#ff9800'};">
+                    <strong>${e.text}</strong>
+                    <div style="font-size: 0.85rem; color: #aaa; margin-top: 4px;">${e.type.charAt(0).toUpperCase() + e.type.slice(1)}</div>
+                </div>`;
+            }).join('');
+            
+            // Create modal if doesn't exist
+            let modal = document.getElementById('day-detail-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'day-detail-modal';
+                modal.className = 'modal';
+                modal.innerHTML = `<div class="modal-content" style="max-width:500px"><span class="close-modal" onclick="closeModal('day-detail-modal')">&times;</span><h2 id="day-detail-title"></h2><div id="day-detail-events"></div></div>`;
+                document.body.appendChild(modal);
+            }
+            document.getElementById('day-detail-title').textContent = '📅 ' + dateStr;
+            document.getElementById('day-detail-events').innerHTML = eventsHtml;
+            openModal('day-detail-modal');
+        }
+
+        function getEventsForDate(date) {
+            const events = [];
+            const dateStr = date.toISOString().split('T')[0];
+
+            // Timezone offsets from UTC in hours
+            const tzOffsets = {'EST':-5,'EDT':-4,'CST':-6,'CDT':-5,'MST':-7,'MDT':-6,'PST':-8,'PDT':-7,'GMT':0,'BST':1,'CET':1,'CEST':2,'IST':5.5,'JST':9,'KST':9,'AEST':10,'HKT':8,'SGT':8};
+            const HKT_OFFSET = 8;
+
+            // Customer calls — convert to HKT
+            customers.forEach(c => {
+                if (c.callDate) {
+                    let callDate = new Date(c.callDate);
+                    // Convert from client timezone to HKT
+                    const clientOffset = tzOffsets[c.timezone] !== undefined ? tzOffsets[c.timezone] : 0;
+                    const diffHours = HKT_OFFSET - clientOffset;
+                    const hktDate = new Date(callDate.getTime() + diffHours * 60 * 60 * 1000);
+                    const hktDateStr = hktDate.toISOString().split('T')[0];
+                    if (hktDateStr === dateStr) {
+                        const hktTime = hktDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        events.push({
+                            type: 'customer',
+                            text: `${hktTime} HKT - ${c.name} (${c.timezone})`
+                        });
+                    }
+                }
+            });
+
+            // Personal follow-ups
+            personal.forEach(p => {
+                if (p.followUpDate === dateStr) {
+                    events.push({
+                        type: 'personal',
+                        text: `Follow up: ${p.name}`
+                    });
+                }
+            });
+
+            // Todo due dates
+            todos.forEach(t => {
+                if (t.dueDate === dateStr && !t.done) {
+                    events.push({
+                        type: 'employee',
+                        text: `📋 ${t.task.substring(0, 30)}${t.task.length > 30 ? '...' : ''}`
+                    });
+                }
+            });
+
+            return events;
+        }
+
+        function changeMonth(delta) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentCalendarDate = new Date();
+            renderCalendar();
+        }
+
+        // Modals
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Forms
+        function setupForms() {
+            document.getElementById('customer-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = document.getElementById('customer-id').value;
+                const customer = {
+                    id: id ? parseInt(id) : Date.now(),
+                    name: document.getElementById('customer-name').value,
+                    useCase: document.getElementById('customer-usecase').value,
+                    package: document.getElementById('customer-package').value,
+                    price: document.getElementById('customer-price').value,
+                    callDate: document.getElementById('customer-calldate').value,
+                    timezone: document.getElementById('customer-timezone').value,
+                    status: document.getElementById('customer-status').value,
+                    notes: document.getElementById('customer-notes').value,
+                    paid: document.getElementById('customer-paid').checked,
+                    paymentMethod: document.getElementById('customer-payment-method').value,
+                    paymentStatus: document.getElementById('customer-payment-status').value,
+                    paymentDate: document.getElementById('customer-payment-date').value,
+                    groupChatCreated: document.getElementById('customer-group-chat-created').checked,
+                    groupChatLink: document.getElementById('customer-group-chat-link').value,
+                    needsAnotherCall: document.getElementById('customer-needs-another-call').checked,
+                    nextCallDate: document.getElementById('customer-next-call-date').value,
+                    customPackageNote: document.getElementById('customer-custom-package-note').value
+                };
+
+                if (id) {
+                    const index = customers.findIndex(c => c.id === parseInt(id));
+                    customers[index] = customer;
+                } else {
+                    customers.push(customer);
+                }
+
+                saveData();
+                renderCustomers();
+                renderDashboard();
+                renderCalendar();
+                closeModal('customer-modal');
+                showToast('Customer saved', 'success');
+            });
+
+            document.getElementById('employee-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = document.getElementById('employee-id').value;
+                const skillsCheckboxes = document.querySelectorAll('#employee-skills-container input:checked');
+                const customersCheckboxes = document.querySelectorAll('#employee-customers-container input:checked');
+                
+                const employee = {
+                    id: id ? parseInt(id) : Date.now(),
+                    name: document.getElementById('employee-name').value,
+                    email: document.getElementById('employee-email').value,
+                    contact: document.getElementById('employee-contact').value,
+                    skills: Array.from(skillsCheckboxes).map(cb => cb.value),
+                    assignedCustomers: Array.from(customersCheckboxes).map(cb => parseInt(cb.value)),
+                    timezone: document.getElementById('employee-timezone').value,
+                    availability: document.getElementById('employee-availability').value,
+                    access: id ? (employees.find(e => e.id === parseInt(id))?.access || 'Pending') : 'Pending',
+                    notes: document.getElementById('employee-notes').value
+                };
+
+                if (id) {
+                    const index = employees.findIndex(e => e.id === parseInt(id));
+                    employees[index] = employee;
+                } else {
+                    employees.push(employee);
+                }
+
+                saveData();
+                renderEmployees();
+                closeModal('employee-modal');
+                showToast('Employee saved', 'success');
+            });
+
+            document.getElementById('research-employee-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = document.getElementById('research-employee-id').value;
+                const employee = {
+                    id: id ? parseInt(id) : Date.now(),
+                    name: document.getElementById('research-employee-name').value,
+                    source: document.getElementById('research-employee-source').value,
+                    skills: document.getElementById('research-employee-skills').value,
+                    ratePerCall: document.getElementById('research-employee-rate').value,
+                    interviewStatus: document.getElementById('research-employee-interview-status').value,
+                    notes: document.getElementById('research-employee-notes').value
+                };
+
+                if (id) {
+                    const index = researchEmployees.findIndex(e => e.id === parseInt(id));
+                    researchEmployees[index] = employee;
+                } else {
+                    researchEmployees.push(employee);
+                }
+
+                saveData();
+                renderResearchEmployees();
+                closeModal('research-employee-modal');
+                showToast('Research employee saved', 'success');
+            });
+
+            document.getElementById('personal-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = document.getElementById('personal-id').value;
+                const person = {
+                    id: id ? parseInt(id) : Date.now(),
+                    name: document.getElementById('personal-name').value,
+                    relationship: document.getElementById('personal-relationship').value,
+                    pitchAngle: document.getElementById('personal-pitch').value,
+                    status: document.getElementById('personal-status').value,
+                    interestLevel: document.getElementById('personal-interest').value,
+                    followUpDate: document.getElementById('personal-followup').value,
+                    notes: document.getElementById('personal-notes').value
+                };
+
+                if (id) {
+                    const index = personal.findIndex(p => p.id === parseInt(id));
+                    personal[index] = person;
+                } else {
+                    personal.push(person);
+                }
+
+                saveData();
+                renderPersonal();
+                renderCalendar();
+                closeModal('personal-modal');
+                showToast('Contact saved', 'success');
+            });
+
+            document.getElementById('resource-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const id = document.getElementById('resource-id').value;
+                const resource = {
+                    id: id ? parseInt(id) : Date.now(),
+                    category: document.getElementById('resource-category').value,
+                    title: document.getElementById('resource-title').value,
+                    description: document.getElementById('resource-description').value,
+                    url: document.getElementById('resource-url').value
+                };
+
+                if (id) {
+                    const index = resources.findIndex(r => r.id === parseInt(id));
+                    resources[index] = resource;
+                } else {
+                    resources.push(resource);
+                }
+
+                saveData();
+                renderResources();
+                closeModal('resource-modal');
+                showToast('Resource saved', 'success');
+            });
+        }
+
+        // Search
+        function setupSearch() {
+            document.getElementById('customer-search').addEventListener('input', renderCustomers);
+            document.getElementById('employee-search').addEventListener('input', renderEmployees);
+            document.getElementById('research-search').addEventListener('input', renderResearchEmployees);
+            document.getElementById('personal-search').addEventListener('input', renderPersonal);
+        }
+
+        // Sort
+        let sortDirection = {};
+
+        function sortTable(table, field) {
+            const key = `${table}-${field}`;
+            sortDirection[key] = !sortDirection[key];
+            
+            const data = table === 'customers' ? customers : 
+                         table === 'employees' ? employees : 
+                         table === 'researchEmployees' ? researchEmployees : personal;
+            
+            data.sort((a, b) => {
+                let aVal = a[field];
+                let bVal = b[field];
+                
+                if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+                if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+                
+                if (aVal < bVal) return sortDirection[key] ? -1 : 1;
+                if (aVal > bVal) return sortDirection[key] ? 1 : -1;
+                return 0;
+            });
+            
+            if (table === 'customers') renderCustomers();
+            if (table === 'employees') renderEmployees();
+            if (table === 'researchEmployees') renderResearchEmployees();
+            if (table === 'personal') renderPersonal();
+        }
+
+        // Export
+        function exportCustomers() {
+            const data = customers.map(c => ({
+                ...c,
+                groupChatCreated: c.groupChatCreated ? 'Yes' : 'No'
+            }));
+            exportToCSV(data, 'customers.csv', ['id', 'name', 'useCase', 'package', 'price', 'callDate', 'timezone', 'status', 'paid', 'paymentMethod', 'paymentStatus', 'paymentDate', 'groupChatCreated', 'groupChatLink', 'notes']);
+        }
+
+        function exportEmployees() {
+            const data = employees.map(e => ({
+                ...e,
+                skills: e.skills.join('; '),
+                assignedCustomers: e.assignedCustomers.map(id => {
+                    const c = customers.find(cust => cust.id === id);
+                    return c ? c.name : '';
+                }).join('; ')
+            }));
+            exportToCSV(data, 'employees.csv', ['id', 'name', 'contact', 'skills', 'assignedCustomers', 'availability', 'notes']);
+        }
+
+        function exportResearchEmployees() {
+            exportToCSV(researchEmployees, 'research-employees.csv', ['id', 'name', 'source', 'skills', 'ratePerCall', 'interviewStatus', 'notes']);
+        }
+
+        function exportPersonal() {
+            exportToCSV(personal, 'personal.csv', ['id', 'name', 'relationship', 'pitchAngle', 'status', 'interestLevel', 'followUpDate', 'notes']);
+        }
+
+        function exportToCSV(data, filename, fields) {
+            const csv = [
+                fields.join(','),
+                ...data.map(row => fields.map(field => {
+                    let val = row[field] || '';
+                    if (typeof val === 'string' && val.includes(',')) val = `"${val}"`;
+                    return val;
+                }).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Exported to CSV', 'success');
+        }
+
+        // Export/Import All Data
+        // ========== TODOS ==========
+        let todos = [];
+        let teamMembers = [];
+
+        function initTodos() {
+            const saved = localStorage.getItem('todos');
+            if (saved) { todos = JSON.parse(saved); }
+            else {
+                todos = [
+                    {id:1, task:'Upload YouTube tutorial (blocks William contacts)', urgency:'🔴 Critical', assignee:'Ty', dueDate:'2026-02-20', status:'To Do', done:false, notes:'William waiting on this'},
+                    {id:2, task:'Fix Brave Search API key', urgency:'🟡 High', assignee:'Ty', dueDate:'2026-02-19', status:'To Do', done:false, notes:'openclaw configure --section web'},
+                    {id:3, task:'Follow up Elmer Peysakhov', urgency:'🔵 Medium', assignee:'Ty', dueDate:'2026-02-21', status:'To Do', done:false, notes:'Real estate guy'},
+                    {id:4, task:'DM Ezra Dweck (warmest personal lead)', urgency:'🟡 High', assignee:'Ty', dueDate:'2026-02-19', status:'To Do', done:false, notes:''},
+                    {id:5, task:'Post 2-3 Reddit comments', urgency:'🔵 Medium', assignee:'Ty', dueDate:'2026-02-19', status:'To Do', done:false, notes:'r/OpenClaw, r/ClaudeAI'},
+                    {id:6, task:'List Fiverr gig for OpenClaw setup', urgency:'🟡 High', assignee:'Jaiden', dueDate:'2026-02-20', status:'To Do', done:false, notes:'$99 basic setup'},
+                    {id:7, task:'Ask Ryan Hanley for referral', urgency:'🔴 Critical', assignee:'Ty', dueDate:'2026-02-19', status:'To Do', done:false, notes:'First client — get testimonial too'},
+                ];
+                localStorage.setItem('todos', JSON.stringify(todos));
+            }
+            const savedTeam = localStorage.getItem('teamMembers');
+            if (savedTeam) { teamMembers = JSON.parse(savedTeam); }
+            else {
+                teamMembers = [
+                    {id:1, name:'Ty', role:'Admin', contact:'Telegram'},
+                    {id:2, name:'Jaiden', role:'Admin', contact:'WhatsApp'},
+                ];
+                localStorage.setItem('teamMembers', JSON.stringify(teamMembers));
+            }
+            updateAssigneeDropdowns();
+        }
+
+        function updateAssigneeDropdowns() {
+            const assigneeSelect = document.getElementById('todo-assignee');
+            const filterSelect = document.getElementById('todo-filter-assignee');
+            const names = [...new Set([...teamMembers.map(t => t.name), 'Unassigned'])];
+            assigneeSelect.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
+            filterSelect.innerHTML = '<option value="">All Assignees</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+        }
+
+        function renderTodos() {
+            const filterUrgency = document.getElementById('todo-filter-urgency').value;
+            const filterAssignee = document.getElementById('todo-filter-assignee').value;
+            let filtered = todos;
+            if (filterUrgency) filtered = filtered.filter(t => t.urgency === filterUrgency);
+            if (filterAssignee) filtered = filtered.filter(t => t.assignee === filterAssignee);
+            
+            // Sort: undone first, then by urgency
+            const urgencyOrder = {'🔴 Critical':0, '🟡 High':1, '🔵 Medium':2, '⚪ Low':3};
+            filtered.sort((a,b) => {
+                if (a.done !== b.done) return a.done ? 1 : -1;
+                return (urgencyOrder[a.urgency]||4) - (urgencyOrder[b.urgency]||4);
+            });
+
+            document.getElementById('todos-table').innerHTML = filtered.map(t => `
+                <tr style="${t.done ? 'opacity:0.5;text-decoration:line-through;' : ''}">
+                    <td><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodoDone(${t.id})"></td>
+                    <td>${t.urgency}</td>
+                    <td>${t.task}</td>
+                    <td>${t.assignee}</td>
+                    <td>${t.dueDate || '-'}</td>
+                    <td><span style="padding:0.25rem 0.75rem;border-radius:4px;background:${t.status==='Done'?'#1a472a':t.status==='In Progress'?'#0f3460':t.status==='Blocked'?'#5c1a1a':'#2a2a3e'};font-size:0.875rem;">${t.status}</span></td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${t.notes || '-'}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="editTodo(${t.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTodo(${t.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showAddTodo() {
+            document.getElementById('todo-modal-title').textContent = 'Add Task';
+            document.getElementById('todo-form').reset();
+            document.getElementById('todo-id').value = '';
+            openModal('todo-modal');
+        }
+
+        function editTodo(id) {
+            const t = todos.find(x => x.id === id);
+            if (!t) return;
+            document.getElementById('todo-modal-title').textContent = 'Edit Task';
+            document.getElementById('todo-id').value = t.id;
+            document.getElementById('todo-task').value = t.task;
+            document.getElementById('todo-urgency').value = t.urgency;
+            document.getElementById('todo-assignee').value = t.assignee;
+            document.getElementById('todo-due-date').value = t.dueDate;
+            document.getElementById('todo-status').value = t.status;
+            document.getElementById('todo-notes').value = t.notes;
+            openModal('todo-modal');
+        }
+
+        function saveTodo(e) {
+            e.preventDefault();
+            const id = document.getElementById('todo-id').value;
+            const todo = {
+                id: id ? parseInt(id) : Date.now(),
+                task: document.getElementById('todo-task').value,
+                urgency: document.getElementById('todo-urgency').value,
+                assignee: document.getElementById('todo-assignee').value,
+                dueDate: document.getElementById('todo-due-date').value,
+                status: document.getElementById('todo-status').value,
+                notes: document.getElementById('todo-notes').value,
+                done: id ? todos.find(t=>t.id===parseInt(id))?.done || false : false
+            };
+            if (id) {
+                const idx = todos.findIndex(t => t.id === parseInt(id));
+                todos[idx] = todo;
+            } else {
+                todos.push(todo);
+            }
+            localStorage.setItem('todos', JSON.stringify(todos));
+            closeModal('todo-modal');
+            renderTodos();
+            showToast(id ? 'Task updated!' : 'Task added!');
+        }
+
+        function deleteTodo(id) {
+            if (!confirm('Delete this task?')) return;
+            todos = todos.filter(t => t.id !== id);
+            localStorage.setItem('todos', JSON.stringify(todos));
+            renderTodos();
+            showToast('Task deleted');
+        }
+
+        function toggleTodoDone(id) {
+            const t = todos.find(x => x.id === id);
+            if (t) {
+                t.done = !t.done;
+                if (t.done) t.status = 'Done';
+                localStorage.setItem('todos', JSON.stringify(todos));
+                renderTodos();
+            }
+        }
+
+        // ========== ADMIN PANEL ==========
+        function showAdminPanel() {
+            renderTeamList();
+            openModal('admin-modal');
+        }
+
+        function renderTeamList() {
+            document.getElementById('admin-team-list').innerHTML = teamMembers.length ? teamMembers.map(m => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin:4px 0;background:#16213e;border-radius:6px;">
+                    <div>
+                        <strong>${m.name}</strong> <span style="color:#aaa;font-size:0.85rem;">— ${m.role}</span>
+                        <div style="font-size:0.8rem;color:#666;">${m.contact || ''}</div>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="removeTeamMember(${m.id})">✕</button>
+                </div>
+            `).join('') : '<p style="color:#666;">No team members yet</p>';
+        }
+
+        function addTeamMember(e) {
+            e.preventDefault();
+            teamMembers.push({
+                id: Date.now(),
+                name: document.getElementById('admin-member-name').value,
+                role: document.getElementById('admin-member-role').value,
+                contact: document.getElementById('admin-member-contact').value
+            });
+            localStorage.setItem('teamMembers', JSON.stringify(teamMembers));
+            document.getElementById('admin-member-name').value = '';
+            document.getElementById('admin-member-contact').value = '';
+            renderTeamList();
+            updateAssigneeDropdowns();
+            showToast('Team member added!');
+        }
+
+        function removeTeamMember(id) {
+            teamMembers = teamMembers.filter(m => m.id !== id);
+            localStorage.setItem('teamMembers', JSON.stringify(teamMembers));
+            renderTeamList();
+            updateAssigneeDropdowns();
+        }
+
+        function exportAllData() {
+            const allData = {
+                customers: customers,
+                employees: employees,
+                researchEmployees: researchEmployees,
+                personal: personal,
+                resources: resources,
+                todos: todos,
+                teamMembers: teamMembers,
+                exportDate: new Date().toISOString()
+            };
+
+            const json = JSON.stringify(allData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `openclaw-dashboard-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('All data exported successfully', 'success');
+        }
+
+        function importAllData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm('This will replace all current data. Are you sure you want to import?')) {
+                        if (data.customers) customers = data.customers;
+                        if (data.employees) employees = data.employees;
+                        if (data.researchEmployees) researchEmployees = data.researchEmployees;
+                        if (data.personal) personal = data.personal;
+                        if (data.resources) resources = data.resources;
+                        if (data.todos) { todos = data.todos; localStorage.setItem('todos', JSON.stringify(todos)); }
+                        if (data.teamMembers) { teamMembers = data.teamMembers; localStorage.setItem('teamMembers', JSON.stringify(teamMembers)); }
+                        
+                        saveData();
+                        renderCustomers();
+                        renderEmployees();
+                        renderResearchEmployees();
+                        renderPersonal();
+                        renderResources();
+                        renderTodos();
+                        renderDashboard();
+                        renderCalendar();
+                        updateAssigneeDropdowns();
+                        
+                        showToast('Data imported successfully', 'success');
+                    }
+                } catch (err) {
+                    showToast('Error importing data: ' + err.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Toast
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
