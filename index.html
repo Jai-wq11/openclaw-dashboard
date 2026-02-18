@@ -813,9 +813,15 @@
                     <div id="revenue-chart"></div>
                 </div>
 
-                <div class="upcoming-calls">
-                    <h2 style="margin-bottom: 1rem;">Upcoming Calls</h2>
-                    <div id="upcoming-calls-list"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+                    <div class="upcoming-calls">
+                        <h2 style="margin-bottom: 1rem;">Upcoming Calls</h2>
+                        <div id="upcoming-calls-list"></div>
+                    </div>
+                    <div class="upcoming-calls">
+                        <h2 style="margin-bottom: 1rem;">Where Customers Find Us</h2>
+                        <div id="source-breakdown"></div>
+                    </div>
                 </div>
             </div>
 
@@ -2180,6 +2186,7 @@
 
             renderRevenueChart();
             renderUpcomingCalls();
+            renderSourceBreakdown();
         }
 
         function parsePrice(priceStr) {
@@ -2256,6 +2263,40 @@
                         <div class="call-name">${c.name}</div>
                         <div class="call-time">${callDate.toLocaleString()} ${c.timezone}</div>
                         <div class="countdown" data-date="${c.callDate}">Calculating...</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderSourceBreakdown() {
+            const container = document.getElementById('source-breakdown');
+            const counts = {};
+            customers.forEach(c => {
+                const src = c.source || 'Unknown';
+                counts[src] = (counts[src] || 0) + 1;
+            });
+
+            const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            const total = customers.length || 1;
+            const colors = ['#e94560', '#60a5fa', '#4ade80', '#facc15', '#a78bfa', '#f97316', '#ec4899', '#14b8a6'];
+
+            if (sorted.length === 0) {
+                container.innerHTML = '<p style="color:#888;">No customer data yet</p>';
+                return;
+            }
+
+            container.innerHTML = sorted.map(([source, count], i) => {
+                const pct = Math.round((count / total) * 100);
+                const color = colors[i % colors.length];
+                return `
+                    <div style="margin-bottom:10px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                            <span>${source}</span>
+                            <span style="color:${color};font-weight:600;">${count} (${pct}%)</span>
+                        </div>
+                        <div style="background:#0a0e27;border-radius:6px;height:8px;overflow:hidden;">
+                            <div style="background:${color};height:100%;width:${pct}%;border-radius:6px;transition:width 0.3s;"></div>
+                        </div>
                     </div>
                 `;
             }).join('');
