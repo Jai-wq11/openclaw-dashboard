@@ -318,6 +318,22 @@
             border: 1px solid #0f3460;
         }
 
+        .modal-content.wide {
+            max-width: 800px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1.5rem;
+        }
+        .form-grid .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        @media (max-width: 600px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -1123,119 +1139,121 @@
 
     <!-- Customer Modal -->
     <div class="modal" id="customer-modal">
-        <div class="modal-content">
+        <div class="modal-content wide">
             <div class="modal-header">
                 <h2 id="customer-modal-title">Add Customer</h2>
                 <button class="close-btn" onclick="closeModal('customer-modal')">×</button>
             </div>
             <form id="customer-form">
                 <input type="hidden" id="customer-id">
-                <div class="form-group">
-                    <label>Name *</label>
-                    <input type="text" id="customer-name" required>
-                </div>
-                <div class="form-group">
-                    <label>Use Case</label>
-                    <input type="text" id="customer-usecase">
-                </div>
-                <div class="form-group">
-                    <label>Package</label>
-                    <select id="customer-package">
-                        <option value="">Select...</option>
-                        <option value="Basic">Basic</option>
-                        <option value="Pro">Pro</option>
-                        <option value="Premium">Premium</option>
-                        <option value="Troubleshoot">Troubleshoot</option>
-                        <option value="Custom">Custom</option>
-                    </select>
-                </div>
-                <div class="form-group" id="custom-package-note-group" style="display:none">
-                    <label>Custom Package Notes</label>
-                    <input type="text" id="customer-custom-package-note" placeholder="Describe custom package...">
-                </div>
-                <div class="form-group">
-                    <label>Needs Another Call</label>
-                    <div style="display:flex;gap:10px;align-items:center">
-                        <input type="checkbox" id="customer-needs-another-call" style="width:auto">
-                        <input type="date" id="customer-next-call-date" placeholder="Next call date" style="flex:1">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="customer-name" required>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Price (USD)</label>
-                    <input type="text" id="customer-price" placeholder="e.g., $199 or TBD">
-                </div>
-                <div class="form-group">
-                    <label>Call Date</label>
-                    <input type="datetime-local" id="customer-calldate">
-                </div>
-                <div class="form-group">
-                    <label>Timezone</label>
-                    <select id="customer-timezone">
-                        <option value="">Select...</option>
-                        <option value="EST">EST</option>
-                        <option value="CST">CST</option>
-                        <option value="MST">MST</option>
-                        <option value="PST">PST</option>
-                        <option value="GMT">GMT</option>
-                        <option value="CET">CET</option>
-                        <option value="IST">IST</option>
-                        <option value="AEST">AEST</option>
-                        <option value="JST">JST</option>
-                        <option value="HKT">HKT</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="customer-status">
-                        <option value="New">New</option>
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                        <option value="Follow-up">Follow-up</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="customer-paid"> Paid
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <select id="customer-payment-method">
-                        <option value="">Select...</option>
-                        <option value="PayPal">PayPal</option>
-                        <option value="Wise">Wise</option>
-                        <option value="Crypto">Crypto</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Cash">Cash</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Payment Status</label>
-                    <select id="customer-payment-status">
-                        <option value="Unpaid">Unpaid</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Paid">Paid</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Payment Date</label>
-                    <input type="date" id="customer-payment-date">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="customer-group-chat-created"> Group Chat Created
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label>Group Chat Link</label>
-                    <input type="url" id="customer-group-chat-link" placeholder="https://...">
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="customer-notes"></textarea>
+                    <div class="form-group">
+                        <label>Use Case</label>
+                        <input type="text" id="customer-usecase">
+                    </div>
+                    <div class="form-group">
+                        <label>Package</label>
+                        <select id="customer-package">
+                            <option value="">Select...</option>
+                            <option value="Basic">Basic</option>
+                            <option value="Pro">Pro</option>
+                            <option value="Premium">Premium</option>
+                            <option value="Troubleshoot">Troubleshoot</option>
+                            <option value="Custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Price (USD)</label>
+                        <input type="text" id="customer-price" placeholder="e.g., $199 or TBD">
+                    </div>
+                    <div class="form-group full-width" id="custom-package-note-group" style="display:none">
+                        <label>Custom Package Notes</label>
+                        <input type="text" id="customer-custom-package-note" placeholder="Describe custom package...">
+                    </div>
+                    <div class="form-group">
+                        <label>Call Date</label>
+                        <input type="datetime-local" id="customer-calldate">
+                    </div>
+                    <div class="form-group">
+                        <label>Timezone</label>
+                        <select id="customer-timezone">
+                            <option value="">Select...</option>
+                            <option value="EST">EST</option>
+                            <option value="CST">CST</option>
+                            <option value="MST">MST</option>
+                            <option value="PST">PST</option>
+                            <option value="GMT">GMT</option>
+                            <option value="CET">CET</option>
+                            <option value="IST">IST</option>
+                            <option value="AEST">AEST</option>
+                            <option value="JST">JST</option>
+                            <option value="HKT">HKT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="customer-status">
+                            <option value="New">New</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Follow-up">Follow-up</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Needs Another Call</label>
+                        <div style="display:flex;gap:10px;align-items:center">
+                            <input type="checkbox" id="customer-needs-another-call" style="width:auto">
+                            <input type="date" id="customer-next-call-date" placeholder="Next call date" style="flex:1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="customer-payment-method">
+                            <option value="">Select...</option>
+                            <option value="PayPal">PayPal</option>
+                            <option value="Wise">Wise</option>
+                            <option value="Crypto">Crypto</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Status</label>
+                        <select id="customer-payment-status">
+                            <option value="Unpaid">Unpaid</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Paid">Paid</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Date</label>
+                        <input type="date" id="customer-payment-date">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="customer-paid"> Paid
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="customer-group-chat-created"> Group Chat Created
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Group Chat Link</label>
+                        <input type="url" id="customer-group-chat-link" placeholder="https://...">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Notes</label>
+                        <textarea id="customer-notes" rows="3"></textarea>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('customer-modal')">Cancel</button>
