@@ -755,6 +755,10 @@
                 <span class="nav-icon">💡</span>
                 <span>Ideas</span>
             </div>
+            <div class="nav-item" data-view="expenses">
+                <span class="nav-icon">💸</span>
+                <span>Expenses</span>
+            </div>
             <div class="sidebar-divider"></div>
             <div class="nav-item" onclick="exportAllData()">
                 <span class="nav-icon">📤</span>
@@ -1064,6 +1068,116 @@
                 <div id="ideas-list" style="display:flex;flex-direction:column;gap:12px;"></div>
             </div>
 
+            <!-- Expenses View -->
+            <div class="view" id="expenses">
+                <h1>💸 Expenses</h1>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Spent</div>
+                        <div class="stat-value" id="expenses-total">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value" id="expenses-month">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Budget Remaining</div>
+                        <div class="stat-value" id="expenses-remaining">$0</div>
+                    </div>
+                </div>
+                <div class="table-controls">
+                    <input type="text" class="search-bar" id="expense-search" placeholder="Search expenses..." style="max-width:300px;" oninput="renderExpenses()">
+                    <div style="display:flex;gap:1rem;align-items:center;">
+                        <select id="expense-filter-category" onchange="renderExpenses()" style="padding:8px;border-radius:6px;background:#16213e;color:white;border:1px solid #0f3460;">
+                            <option value="">All Categories</option>
+                            <option value="Software">Software</option>
+                            <option value="API Keys">API Keys</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Contractors">Contractors</option>
+                            <option value="Tools">Tools</option>
+                            <option value="Subscriptions">Subscriptions</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <button class="btn btn-secondary btn-sm" onclick="exportExpensesCSV()">📥 Export CSV</button>
+                        <button class="btn btn-primary" onclick="showAddExpense()">+ Add Expense</button>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('expenses','date')">Date</th>
+                                <th onclick="sortTable('expenses','description')">Description</th>
+                                <th onclick="sortTable('expenses','category')">Category</th>
+                                <th onclick="sortTable('expenses','amount')">Amount</th>
+                                <th onclick="sortTable('expenses','paymentMethod')">Payment</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenses-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div class="modal" id="expense-modal">
+        <div class="modal-content" style="max-width:500px">
+            <div class="modal-header">
+                <h2 id="expense-modal-title">Add Expense</h2>
+                <button class="close-btn" onclick="closeModal('expense-modal')">×</button>
+            </div>
+            <form id="expense-form">
+                <input type="hidden" id="expense-id">
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" id="expense-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <input type="text" id="expense-description" required placeholder="What was it for?">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="expense-category">
+                        <option value="Software">Software</option>
+                        <option value="API Keys">API Keys</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Contractors">Contractors</option>
+                        <option value="Tools">Tools</option>
+                        <option value="Subscriptions">Subscriptions</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount (USD) *</label>
+                    <input type="number" id="expense-amount" required step="0.01" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="expense-payment-method">
+                        <option value="">Select...</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="PayPal">PayPal</option>
+                        <option value="Wise">Wise</option>
+                        <option value="Crypto">Crypto</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="expense-notes" rows="2"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('expense-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1572,6 +1686,7 @@
             loadData();
             initTodos();
             initIdeas();
+            initExpenses();
             renderCustomers();
             renderEmployees();
             renderResearchEmployees();
@@ -2804,6 +2919,120 @@
             showToast('Idea deleted', 'success');
         }
 
+        // ===== EXPENSES =====
+        let expenses = [];
+        const MONTHLY_BUDGET = 1280; // $1,280 USD (~10K HKD credit card limit)
+
+        function initExpenses() {
+            const saved = localStorage.getItem('expenses');
+            if (saved) expenses = JSON.parse(saved);
+            renderExpenses();
+
+            document.getElementById('expense-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('expense-id').value;
+                const expense = {
+                    id: id ? parseInt(id) : Date.now(),
+                    date: document.getElementById('expense-date').value,
+                    description: document.getElementById('expense-description').value,
+                    category: document.getElementById('expense-category').value,
+                    amount: parseFloat(document.getElementById('expense-amount').value),
+                    paymentMethod: document.getElementById('expense-payment-method').value,
+                    notes: document.getElementById('expense-notes').value
+                };
+                if (id) {
+                    const idx = expenses.findIndex(ex => ex.id === parseInt(id));
+                    expenses[idx] = expense;
+                } else {
+                    expenses.push(expense);
+                }
+                localStorage.setItem('expenses', JSON.stringify(expenses));
+                renderExpenses();
+                closeModal('expense-modal');
+                showToast('Expense saved', 'success');
+            });
+        }
+
+        function renderExpenses() {
+            const search = (document.getElementById('expense-search')?.value || '').toLowerCase();
+            const catFilter = document.getElementById('expense-filter-category')?.value || '';
+            const filtered = expenses.filter(ex =>
+                (ex.description.toLowerCase().includes(search) || (ex.notes||'').toLowerCase().includes(search)) &&
+                (!catFilter || ex.category === catFilter)
+            ).sort((a, b) => b.date.localeCompare(a.date));
+
+            const tbody = document.getElementById('expenses-tbody');
+            tbody.innerHTML = filtered.map(ex => `
+                <tr>
+                    <td>${ex.date}</td>
+                    <td>${ex.description}</td>
+                    <td><span class="status-badge" style="background:#0f3460;color:#e94560;">${ex.category}</span></td>
+                    <td style="font-weight:600;color:#e94560;">$${ex.amount.toFixed(2)}</td>
+                    <td>${ex.paymentMethod || ''}</td>
+                    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;">${ex.notes || ''}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="editExpense(${ex.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteExpense(${ex.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Stats
+            const now = new Date();
+            const monthStr = now.toISOString().slice(0, 7);
+            const totalSpent = expenses.reduce((s, ex) => s + ex.amount, 0);
+            const monthSpent = expenses.filter(ex => ex.date.startsWith(monthStr)).reduce((s, ex) => s + ex.amount, 0);
+            document.getElementById('expenses-total').textContent = '$' + totalSpent.toFixed(2);
+            document.getElementById('expenses-month').textContent = '$' + monthSpent.toFixed(2);
+            const remaining = MONTHLY_BUDGET - monthSpent;
+            document.getElementById('expenses-remaining').textContent = '$' + remaining.toFixed(2);
+            document.getElementById('expenses-remaining').style.color = remaining < 200 ? '#e94560' : '#4ade80';
+        }
+
+        function showAddExpense() {
+            document.getElementById('expense-modal-title').textContent = 'Add Expense';
+            document.getElementById('expense-form').reset();
+            document.getElementById('expense-id').value = '';
+            document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
+            openModal('expense-modal');
+        }
+
+        function editExpense(id) {
+            const ex = expenses.find(e => e.id === id);
+            if (!ex) return;
+            document.getElementById('expense-modal-title').textContent = 'Edit Expense';
+            document.getElementById('expense-id').value = ex.id;
+            document.getElementById('expense-date').value = ex.date;
+            document.getElementById('expense-description').value = ex.description;
+            document.getElementById('expense-category').value = ex.category;
+            document.getElementById('expense-amount').value = ex.amount;
+            document.getElementById('expense-payment-method').value = ex.paymentMethod || '';
+            document.getElementById('expense-notes').value = ex.notes || '';
+            openModal('expense-modal');
+        }
+
+        function deleteExpense(id) {
+            if (!confirm('Delete this expense?')) return;
+            expenses = expenses.filter(ex => ex.id !== id);
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            renderExpenses();
+            showToast('Expense deleted', 'success');
+        }
+
+        function exportExpensesCSV() {
+            const header = 'Date,Description,Category,Amount,Payment Method,Notes';
+            const rows = expenses.map(ex => `${ex.date},"${ex.description}",${ex.category},${ex.amount.toFixed(2)},${ex.paymentMethod || ''},"${ex.notes || ''}"`);
+            const csv = [header, ...rows].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `expenses-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Expenses exported', 'success');
+        }
+
         let todos = [];
         let teamMembers = [];
 
@@ -2987,6 +3216,7 @@
                 resources: resources,
                 todos: todos,
                 ideas: ideas,
+                expenses: expenses,
                 teamMembers: teamMembers,
                 exportDate: new Date().toISOString()
             };
@@ -3019,6 +3249,7 @@
                         if (data.resources) resources = data.resources;
                         if (data.todos) { todos = data.todos; localStorage.setItem('todos', JSON.stringify(todos)); }
                         if (data.ideas) { ideas = data.ideas; localStorage.setItem('ideas', JSON.stringify(ideas)); }
+                        if (data.expenses) { expenses = data.expenses; localStorage.setItem('expenses', JSON.stringify(expenses)); }
                         if (data.teamMembers) { teamMembers = data.teamMembers; localStorage.setItem('teamMembers', JSON.stringify(teamMembers)); }
                         
                         saveData();
