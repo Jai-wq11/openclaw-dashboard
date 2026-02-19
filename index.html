@@ -1801,7 +1801,92 @@
             localStorage.setItem('researchEmployees', JSON.stringify(researchEmployees));
             localStorage.setItem('personal', JSON.stringify(personal));
             localStorage.setItem('resources', JSON.stringify(resources));
+            // Cloud sync
+            syncToCloud();
         }
+
+        // === CLOUD SYNC ===
+        const SYNC_URL = 'http://localhost:3456';
+        let syncEnabled = false;
+        let lastSyncHash = '';
+
+        function getAllData() {
+            return {
+                customers, employees, researchEmployees, personal, resources,
+                todos: JSON.parse(localStorage.getItem('todos') || '[]'),
+                ideas: JSON.parse(localStorage.getItem('ideas') || '[]'),
+                expenses: JSON.parse(localStorage.getItem('expenses') || '[]'),
+                teamMembers: JSON.parse(localStorage.getItem('teamMembers') || '[]'),
+                updatedAt: Date.now()
+            };
+        }
+
+        function applyData(data) {
+            if (data.customers) { customers = data.customers; localStorage.setItem('customers', JSON.stringify(customers)); }
+            if (data.employees) { employees = data.employees; localStorage.setItem('employees', JSON.stringify(employees)); }
+            if (data.researchEmployees) { researchEmployees = data.researchEmployees; localStorage.setItem('researchEmployees', JSON.stringify(researchEmployees)); }
+            if (data.personal) { personal = data.personal; localStorage.setItem('personal', JSON.stringify(personal)); }
+            if (data.resources) { resources = data.resources; localStorage.setItem('resources', JSON.stringify(resources)); }
+            if (data.todos) localStorage.setItem('todos', JSON.stringify(data.todos));
+            if (data.ideas) localStorage.setItem('ideas', JSON.stringify(data.ideas));
+            if (data.expenses) localStorage.setItem('expenses', JSON.stringify(data.expenses));
+            if (data.teamMembers) localStorage.setItem('teamMembers', JSON.stringify(data.teamMembers));
+        }
+
+        function syncToCloud() {
+            if (!syncEnabled) return;
+            const data = getAllData();
+            fetch(SYNC_URL + '/data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).catch(() => {});
+        }
+
+        function syncFromCloud() {
+            fetch(SYNC_URL + '/data')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data || !data.updatedAt) return;
+                    const hash = JSON.stringify(data.updatedAt);
+                    if (hash === lastSyncHash) return;
+                    lastSyncHash = hash;
+                    applyData(data);
+                    renderCustomers();
+                    renderEmployees();
+                    renderResearchEmployees();
+                    renderPersonal();
+                    renderResources();
+                    renderDashboard();
+                    if (typeof renderTodos === 'function') renderTodos();
+                    if (typeof renderIdeas === 'function') renderIdeas();
+                    if (typeof renderExpenses === 'function') renderExpenses();
+                })
+                .catch(() => {});
+        }
+
+        // Check if sync server is available
+        fetch(SYNC_URL + '/data').then(r => {
+            if (r.ok) {
+                syncEnabled = true;
+                // Sync from cloud on first load
+                r.json().then(data => {
+                    if (data && data.updatedAt) {
+                        const localTime = parseInt(localStorage.getItem('lastSaveTime') || '0');
+                        if (data.updatedAt > localTime) {
+                            applyData(data);
+                            lastSyncHash = JSON.stringify(data.updatedAt);
+                            // Re-render everything
+                            renderCustomers(); renderEmployees(); renderResearchEmployees();
+                            renderPersonal(); renderResources(); renderDashboard();
+                        }
+                    }
+                });
+                // Poll for changes every 3 seconds
+                setInterval(syncFromCloud, 3000);
+                console.log('☁️ Cloud sync enabled');
+            }
+        }).catch(() => { console.log('💾 Local-only mode (sync server not found)'); });
 
         // Navigation
         function setupNavigation() {
