@@ -2536,24 +2536,16 @@
             const events = [];
             const dateStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
 
-            // Timezone offsets from UTC in hours
-            const tzOffsets = {'EST':-5,'EDT':-4,'CST':-6,'CDT':-5,'MST':-7,'MDT':-6,'PST':-8,'PDT':-7,'GMT':0,'BST':1,'CET':1,'CEST':2,'IST':5.5,'JST':9,'KST':9,'AEST':10,'HKT':8,'SGT':8};
-            const HKT_OFFSET = 8;
-
-            // Customer calls — convert to HKT
+            // Customer calls — show on the date as entered
             customers.forEach(c => {
                 if (c.callDate) {
-                    let callDate = new Date(c.callDate);
-                    // Convert from client timezone to HKT
-                    const clientOffset = tzOffsets[c.timezone] !== undefined ? tzOffsets[c.timezone] : 0;
-                    const diffHours = HKT_OFFSET - clientOffset;
-                    const hktDate = new Date(callDate.getTime() + diffHours * 60 * 60 * 1000);
-                    const hktDateStr = hktDate.getFullYear() + '-' + String(hktDate.getMonth()+1).padStart(2,'0') + '-' + String(hktDate.getDate()).padStart(2,'0');
-                    if (hktDateStr === dateStr) {
-                        const hktTime = hktDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                    const callDate = new Date(c.callDate);
+                    const callDateStr = callDate.getFullYear() + '-' + String(callDate.getMonth()+1).padStart(2,'0') + '-' + String(callDate.getDate()).padStart(2,'0');
+                    if (callDateStr === dateStr) {
+                        const callTime = callDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
                         events.push({
                             type: 'customer',
-                            text: `${hktTime} HKT - ${c.name} (${c.timezone})`
+                            text: `${callTime} - ${c.name}${c.timezone ? ' (' + c.timezone + ')' : ''}`
                         });
                     }
                 }
