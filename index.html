@@ -82,6 +82,17 @@
 
         input[type="file"] { display: none; }
 
+        .drag-card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 0.75rem 1rem; cursor: grab; transition: all 0.2s; }
+        .drag-card:hover { background: #1a2844; border-color: #e94560; }
+        .drag-card:active { cursor: grabbing; }
+        .drop-zone { min-height: 80px; border: 2px dashed #0f3460; border-radius: 8px; padding: 0.75rem; transition: all 0.2s; }
+        .drop-zone.drag-over { border-color: #e94560; background: rgba(233,69,96,0.1); }
+        .employee-section { background: #16213e; border: 1px solid #0f3460; border-radius: 12px; padding: 1rem; }
+        .employee-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+        .employee-remove { color: #888; font-size: 0.8rem; cursor: pointer; }
+        .employee-remove:hover { color: #e94560; }
+        .assigned-card { background: #1a2844; border: 1px solid #0f3460; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: flex-start; }
+        .remove-btn { cursor: pointer; font-size: 0.9rem; }
         @media (max-width: 768px) {
             .sidebar { width: 80px; padding: 1rem 0.5rem; }
             .nav-item span:not(.nav-icon) { display: none; }
@@ -110,9 +121,9 @@
                 <span class="nav-icon">✅</span>
                 <span>To-Do List</span>
             </div>
-            <div class="nav-item" data-view="expenses">
-                <span class="nav-icon">💸</span>
-                <span>Expenses</span>
+            <div class="nav-item" data-view="assignments">
+                <span class="nav-icon">🔗</span>
+                <span>Assignments</span>
             </div>
             <div class="sidebar-divider"></div>
             <div class="nav-item" onclick="exportAllData()">
@@ -211,55 +222,24 @@
                 </table>
             </div>
 
-            <!-- Expenses View -->
-            <div class="view" id="expenses">
-                <h1>💸 Expenses</h1>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-                    <div class="stat-card">
-                        <div class="stat-label">Total Spent</div>
-                        <div class="stat-value" id="expenses-total">$0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">This Month</div>
-                        <div class="stat-value" id="expenses-month">$0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Budget Remaining</div>
-                        <div class="stat-value" id="expenses-remaining">$0</div>
-                    </div>
+            <!-- Assignments View -->
+            <div class="view" id="assignments">
+                <h1>🔗 Assignments</h1>
+                <div style="display:flex;gap:1rem;margin-bottom:1.5rem;align-items:center;">
+                    <button class="btn btn-primary btn-sm" onclick="addAssignmentEmployee()">+ Add Employee</button>
+                    <span style="color:#888;font-size:0.875rem;">Drag a customer onto an employee to assign them</span>
                 </div>
-                <div class="table-controls">
-                    <input type="text" class="search-bar" id="expense-search" placeholder="Search expenses..." style="max-width:300px;" oninput="renderExpenses()">
-                    <div style="display:flex;gap:1rem;align-items:center;">
-                        <select id="expense-filter-category" onchange="renderExpenses()" style="padding:8px;border-radius:6px;background:#16213e;color:white;border:1px solid #0f3460;">
-                            <option value="">All Categories</option>
-                            <option value="Software">Software</option>
-                            <option value="API Keys">API Keys</option>
-                            <option value="Marketing">Marketing</option>
-                            <option value="Contractors">Contractors</option>
-                            <option value="Tools">Tools</option>
-                            <option value="Subscriptions">Subscriptions</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <button class="btn btn-secondary btn-sm" onclick="exportExpensesCSV()">📥 Export CSV</button>
-                        <button class="btn btn-primary" onclick="showAddExpense()">+ Add Expense</button>
+                <div style="display:grid;grid-template-columns:1fr 2fr;gap:2rem;min-height:400px;">
+                    <!-- Unassigned Customers -->
+                    <div>
+                        <h2 style="font-size:1.2rem;margin-bottom:1rem;color:#e94560;">📋 Unassigned Customers</h2>
+                        <div id="unassigned-customers" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
                     </div>
-                </div>
-                <div style="overflow-x:auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th onclick="sortTable('expenses','date')">Date</th>
-                                <th onclick="sortTable('expenses','description')">Description</th>
-                                <th onclick="sortTable('expenses','category')">Category</th>
-                                <th onclick="sortTable('expenses','amount')">Amount</th>
-                                <th onclick="sortTable('expenses','paymentMethod')">Payment</th>
-                                <th>Notes</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expenses-tbody"></tbody>
-                    </table>
+                    <!-- Employee Drop Zones -->
+                    <div>
+                        <h2 style="font-size:1.2rem;margin-bottom:1rem;color:#e94560;">👥 Employees</h2>
+                        <div id="employees-drop-zones" style="display:flex;flex-direction:column;gap:1.5rem;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -346,59 +326,23 @@
         </div>
     </div>
 
-    <!-- Expense Modal -->
-    <div class="modal" id="expense-modal">
+    <!-- Assignment Modal -->
+    <div class="modal" id="assignment-modal">
         <div class="modal-content" style="max-width:500px">
             <div class="modal-header">
-                <h2 id="expense-modal-title">Add Expense</h2>
-                <button class="close-btn" onclick="closeModal('expense-modal')">×</button>
+                <h2>Assign Customer</h2>
+                <button class="close-btn" onclick="closeModal('assignment-modal')">×</button>
             </div>
-            <form id="expense-form">
-                <input type="hidden" id="expense-id">
-                <div class="form-group">
-                    <label>Date *</label>
-                    <input type="date" id="expense-date" required>
-                </div>
-                <div class="form-group">
-                    <label>Description *</label>
-                    <input type="text" id="expense-description" required placeholder="What was it for?">
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="expense-category">
-                        <option value="Software">Software</option>
-                        <option value="API Keys">API Keys</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Contractors">Contractors</option>
-                        <option value="Tools">Tools</option>
-                        <option value="Subscriptions">Subscriptions</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Amount (USD) *</label>
-                    <input type="number" id="expense-amount" required step="0.01" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <select id="expense-payment-method">
-                        <option value="">Select...</option>
-                        <option value="Credit Card">Credit Card</option>
-                        <option value="PayPal">PayPal</option>
-                        <option value="Wise">Wise</option>
-                        <option value="Crypto">Crypto</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Cash">Cash</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="expense-notes" rows="2"></textarea>
-                </div>
+            <form id="assignment-form">
+                <input type="hidden" id="assign-customer-id">
+                <input type="hidden" id="assign-employee-name">
+                <div class="form-group"><label>Customer</label><input type="text" id="assign-customer-name" readonly></div>
+                <div class="form-group"><label>Employee</label><input type="text" id="assign-employee-display" readonly></div>
+                <div class="form-group"><label>Call Time</label><input type="datetime-local" id="assign-call-time"></div>
+                <div class="form-group"><label>Goals for this call</label><textarea id="assign-goals" rows="4" placeholder="What should be accomplished during this call?"></textarea></div>
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('expense-modal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('assignment-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Assign</button>
                 </div>
             </form>
         </div>
@@ -418,17 +362,14 @@
 
         let customers = [];
         let todos = [];
-        let expenses = [];
         let assignments = [];
         let assignmentEmployees = [];
         let currentCalendarDate = new Date();
-        const MONTHLY_BUDGET = 1280;
 
         function init() {
             loadData();
             renderCustomers();
             renderTodos();
-            renderExpenses();
             renderCalendar();
             renderAssignments();
             setupNavigation();
@@ -442,8 +383,6 @@
             }
             const st = localStorage.getItem('todos');
             if (st) todos = JSON.parse(st);
-            const se = localStorage.getItem('expenses');
-            if (se) expenses = JSON.parse(se);
             const sa = localStorage.getItem('assignments');
             if (sa) assignments = JSON.parse(sa);
             const sae = localStorage.getItem('assignmentEmployees');
@@ -453,17 +392,15 @@
 
         function saveCustomers() { localStorage.setItem('customers', JSON.stringify(customers)); syncToCloud(); }
         function saveTodos() { localStorage.setItem('todos', JSON.stringify(todos)); syncToCloud(); }
-        function saveExpenses() { localStorage.setItem('expenses', JSON.stringify(expenses)); syncToCloud(); }
         function saveAssignments() { localStorage.setItem('assignments', JSON.stringify(assignments)); localStorage.setItem('assignmentEmployees', JSON.stringify(assignmentEmployees)); syncToCloud(); }
 
         // Firebase
         function getAllData() {
-            return { customers, todos, expenses, assignments, assignmentEmployees, updatedAt: Date.now() };
+            return { customers, todos, assignments, assignmentEmployees, updatedAt: Date.now() };
         }
         function applyData(data) {
             if (data.customers) { customers = data.customers; localStorage.setItem('customers', JSON.stringify(customers)); }
             if (data.todos) { todos = data.todos; localStorage.setItem('todos', JSON.stringify(todos)); }
-            if (data.expenses) { expenses = data.expenses; localStorage.setItem('expenses', JSON.stringify(expenses)); }
             if (data.assignments) { assignments = data.assignments; localStorage.setItem('assignments', JSON.stringify(assignments)); }
             if (data.assignmentEmployees) { assignmentEmployees = data.assignmentEmployees; localStorage.setItem('assignmentEmployees', JSON.stringify(assignmentEmployees)); }
         }
@@ -477,7 +414,7 @@
             firebaseReady = true;
             suppressFirebaseWrite = true;
             applyData(data);
-            renderCustomers(); renderTodos(); renderExpenses(); renderCalendar(); renderAssignments();
+            renderCustomers(); renderTodos(); renderCalendar(); renderAssignments();
             suppressFirebaseWrite = false;
         });
 
@@ -615,72 +552,6 @@
             sel.innerHTML = '<option value="">All Assignees</option>' + names.map(n=>`<option value="${n}">${n}</option>`).join('');
         }
 
-        // === EXPENSES ===
-        function renderExpenses() {
-            const search = (document.getElementById('expense-search')?.value||'').toLowerCase();
-            const catFilter = document.getElementById('expense-filter-category')?.value||'';
-            const filtered = expenses.filter(ex =>
-                (ex.description.toLowerCase().includes(search)||(ex.notes||'').toLowerCase().includes(search)) &&
-                (!catFilter||ex.category===catFilter)
-            ).sort((a,b) => b.date.localeCompare(a.date));
-
-            document.getElementById('expenses-tbody').innerHTML = filtered.map(ex => `
-                <tr>
-                    <td>${ex.date}</td>
-                    <td>${ex.description}</td>
-                    <td><span class="status-badge" style="background:#0f3460;color:#e94560;">${ex.category}</span></td>
-                    <td style="font-weight:600;color:#e94560;">$${ex.amount.toFixed(2)}</td>
-                    <td>${ex.paymentMethod||''}</td>
-                    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;">${ex.notes||''}</td>
-                    <td style="white-space:nowrap;">
-                        <button class="btn btn-secondary btn-sm" onclick="editExpense(${ex.id})">✏️</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteExpense(${ex.id})">🗑️</button>
-                    </td>
-                </tr>`).join('');
-
-            const now = new Date();
-            const monthStr = now.toISOString().slice(0,7);
-            const totalSpent = expenses.reduce((s,ex)=>s+ex.amount,0);
-            const monthSpent = expenses.filter(ex=>ex.date.startsWith(monthStr)).reduce((s,ex)=>s+ex.amount,0);
-            document.getElementById('expenses-total').textContent = '$'+totalSpent.toFixed(2);
-            document.getElementById('expenses-month').textContent = '$'+monthSpent.toFixed(2);
-            const remaining = MONTHLY_BUDGET - monthSpent;
-            document.getElementById('expenses-remaining').textContent = '$'+remaining.toFixed(2);
-            document.getElementById('expenses-remaining').style.color = remaining<200?'#e94560':'#4ade80';
-        }
-        function showAddExpense() {
-            document.getElementById('expense-modal-title').textContent = 'Add Expense';
-            document.getElementById('expense-form').reset();
-            document.getElementById('expense-id').value = '';
-            document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
-            openModal('expense-modal');
-        }
-        function editExpense(id) {
-            const ex = expenses.find(e=>e.id===id); if(!ex) return;
-            document.getElementById('expense-modal-title').textContent = 'Edit Expense';
-            document.getElementById('expense-id').value = ex.id;
-            document.getElementById('expense-date').value = ex.date;
-            document.getElementById('expense-description').value = ex.description;
-            document.getElementById('expense-category').value = ex.category;
-            document.getElementById('expense-amount').value = ex.amount;
-            document.getElementById('expense-payment-method').value = ex.paymentMethod||'';
-            document.getElementById('expense-notes').value = ex.notes||'';
-            openModal('expense-modal');
-        }
-        function deleteExpense(id) {
-            if(!confirm('Delete this expense?')) return;
-            expenses = expenses.filter(ex=>ex.id!==id);
-            saveExpenses(); renderExpenses();
-            showToast('Expense deleted','success');
-        }
-        function exportExpensesCSV() {
-            const csv = ['Date,Description,Category,Amount,Payment Method,Notes',
-                ...expenses.map(ex=>`${ex.date},"${ex.description}",${ex.category},${ex.amount.toFixed(2)},${ex.paymentMethod||''},"${(ex.notes||'').replace(/"/g,'""')}"`)
-            ].join('\n');
-            downloadBlob(csv, `expenses-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
-            showToast('Expenses exported','success');
-        }
-
         // === CALENDAR ===
         function renderCalendar() {
             const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
@@ -733,27 +604,21 @@
                 if(id){const idx=customers.findIndex(x=>x.id===parseInt(id));customers[idx]=c;}else customers.push(c);
                 saveCustomers();renderCustomers();renderCalendar();closeModal('customer-modal');showToast('Customer saved','success');
             });
-            document.getElementById('expense-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const id=document.getElementById('expense-id').value;
-                const ex={id:id?parseInt(id):Date.now(),date:document.getElementById('expense-date').value,description:document.getElementById('expense-description').value,category:document.getElementById('expense-category').value,amount:parseFloat(document.getElementById('expense-amount').value),paymentMethod:document.getElementById('expense-payment-method').value,notes:document.getElementById('expense-notes').value};
-                if(id){const idx=expenses.findIndex(x=>x.id===parseInt(id));expenses[idx]=ex;}else expenses.push(ex);
-                saveExpenses();renderExpenses();closeModal('expense-modal');showToast('Expense saved','success');
-            });
+            document.getElementById('assignment-form').addEventListener('submit', saveAssignment);
         }
 
         // === SORT ===
         let sortDirection={};
         function sortTable(table,field) {
             const key=`${table}-${field}`; sortDirection[key]=!sortDirection[key];
-            const data=table==='customers'?customers:table==='todos'?todos:expenses;
+            const data=table==='customers'?customers:todos;
             data.sort((a,b)=>{let av=a[field]||'',bv=b[field]||'';if(typeof av==='string')av=av.toLowerCase();if(typeof bv==='string')bv=bv.toLowerCase();if(av<bv)return sortDirection[key]?-1:1;if(av>bv)return sortDirection[key]?1:-1;return 0;});
-            if(table==='customers')renderCustomers();if(table==='todos')renderTodos();if(table==='expenses')renderExpenses();
+            if(table==='customers')renderCustomers();if(table==='todos')renderTodos();
         }
 
         // === EXPORT/IMPORT ALL ===
         function exportAllData() {
-            const json=JSON.stringify({customers,todos,expenses,exportDate:new Date().toISOString()},null,2);
+            const json=JSON.stringify({customers,todos,assignments,assignmentEmployees,exportDate:new Date().toISOString()},null,2);
             downloadBlob(json,`openclaw-dashboard-backup-${new Date().toISOString().split('T')[0]}.json`,'application/json');
             showToast('All data exported','success');
         }
@@ -766,8 +631,9 @@
                     if(confirm('This will replace all current data. Continue?')){
                         if(data.customers)customers=data.customers;
                         if(data.todos){todos=data.todos;localStorage.setItem('todos',JSON.stringify(todos));}
-                        if(data.expenses){expenses=data.expenses;localStorage.setItem('expenses',JSON.stringify(expenses));}
-                        saveCustomers();renderCustomers();renderTodos();renderExpenses();renderCalendar();updateAssigneeFilter();
+                        if(data.assignments){assignments=data.assignments;localStorage.setItem('assignments',JSON.stringify(assignments));}
+                        if(data.assignmentEmployees){assignmentEmployees=data.assignmentEmployees;localStorage.setItem('assignmentEmployees',JSON.stringify(assignmentEmployees));}
+                        saveCustomers();renderCustomers();renderTodos();renderCalendar();renderAssignments();updateAssigneeFilter();
                         showToast('Data imported','success');
                     }
                 }catch(err){showToast('Import error: '+err.message,'error');}
@@ -821,7 +687,6 @@
             document.getElementById('assign-customer-id').value = dragData.customerId;
             document.getElementById('assign-customer-name').value = dragData.customerName;
             document.getElementById('assign-employee-name').value = employeeName;
-            document.getElementById('assign-customer-display').value = dragData.customerName;
             document.getElementById('assign-employee-display').value = employeeName;
             document.getElementById('assign-call-time').value = dragData.callDate || '';
             document.getElementById('assign-goals').value = '';
