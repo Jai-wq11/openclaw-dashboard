@@ -82,6 +82,14 @@
 
         input[type="file"] { display: none; }
 
+        .folder-card { background: #16213e; border: 1px solid #0f3460; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .folder-card:hover { background: #1a2844; border-color: #e94560; transform: translateY(-2px); }
+        .folder-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .folder-name { font-weight: 600; font-size: 1rem; }
+        .folder-meta { color: #888; font-size: 0.8rem; margin-top: 0.25rem; }
+        .note-card { background: #1a2844; border: 1px solid #0f3460; border-radius: 8px; padding: 1rem; }
+        .note-card .note-time { color: #888; font-size: 0.75rem; margin-bottom: 0.5rem; }
+        .note-card .note-text { font-size: 0.9rem; white-space: pre-wrap; }
         .drag-card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 0.75rem 1rem; cursor: grab; transition: all 0.2s; }
         .drag-card:hover { background: #1a2844; border-color: #e94560; }
         .drag-card:active { cursor: grabbing; }
@@ -124,6 +132,10 @@
             <div class="nav-item" data-view="assignments">
                 <span class="nav-icon">🔗</span>
                 <span>Assignments</span>
+            </div>
+            <div class="nav-item" data-view="folders">
+                <span class="nav-icon">📁</span>
+                <span>Client Folders</span>
             </div>
             <div class="sidebar-divider"></div>
             <div class="nav-item" onclick="exportAllData()">
@@ -241,6 +253,31 @@
                         <div id="employees-drop-zones" style="display:flex;flex-direction:column;gap:1.5rem;"></div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Client Folders View -->
+            <div class="view" id="folders">
+                <h1>📁 Client Folders</h1>
+                <p style="color:#888;margin-bottom:1.5rem;">Each customer gets a folder. Click to open and add internal notes.</p>
+                <div id="folders-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;"></div>
+            </div>
+
+            <!-- Folder Detail (shown when a folder is opened) -->
+            <div class="view" id="folder-detail">
+                <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="closeFolderDetail()">← Back</button>
+                    <h1 id="folder-detail-name" style="margin-bottom:0;"></h1>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+                    <div class="stat-card"><div class="stat-label">Call Time</div><div id="folder-detail-time" style="font-size:1.1rem;"></div></div>
+                    <div class="stat-card"><div class="stat-label">Customer Notes</div><div id="folder-detail-customer-notes" style="font-size:0.9rem;color:#aaa;"></div></div>
+                </div>
+                <h2 style="font-size:1.2rem;margin-bottom:1rem;">📝 Internal Notes</h2>
+                <div style="display:flex;gap:1rem;margin-bottom:1rem;">
+                    <textarea id="folder-new-note" rows="3" placeholder="Add an internal note..." style="flex:1;"></textarea>
+                    <button class="btn btn-primary" onclick="addFolderNote()" style="align-self:flex-end;">Add Note</button>
+                </div>
+                <div id="folder-notes-list" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
             </div>
         </div>
     </div>
@@ -368,10 +405,12 @@
 
         function init() {
             loadData();
+            loadFolderNotes();
             renderCustomers();
             renderTodos();
             renderCalendar();
             renderAssignments();
+            renderFolders();
             setupNavigation();
             setupForms();
         }
@@ -396,13 +435,14 @@
 
         // Firebase
         function getAllData() {
-            return { customers, todos, assignments, assignmentEmployees, updatedAt: Date.now() };
+            return { customers, todos, assignments, assignmentEmployees, folderNotes, updatedAt: Date.now() };
         }
         function applyData(data) {
             if (data.customers) { customers = data.customers; localStorage.setItem('customers', JSON.stringify(customers)); }
             if (data.todos) { todos = data.todos; localStorage.setItem('todos', JSON.stringify(todos)); }
             if (data.assignments) { assignments = data.assignments; localStorage.setItem('assignments', JSON.stringify(assignments)); }
             if (data.assignmentEmployees) { assignmentEmployees = data.assignmentEmployees; localStorage.setItem('assignmentEmployees', JSON.stringify(assignmentEmployees)); }
+            if (data.folderNotes) { folderNotes = data.folderNotes; localStorage.setItem('folderNotes', JSON.stringify(folderNotes)); }
         }
         function syncToCloud() {
             if (!firebaseReady || suppressFirebaseWrite) return;
@@ -414,7 +454,7 @@
             firebaseReady = true;
             suppressFirebaseWrite = true;
             applyData(data);
-            renderCustomers(); renderTodos(); renderCalendar(); renderAssignments();
+            renderCustomers(); renderTodos(); renderCalendar(); renderAssignments(); renderFolders();
             suppressFirebaseWrite = false;
         });
 
@@ -429,6 +469,7 @@
                         document.getElementById(item.dataset.view).classList.add('active');
                         if (item.dataset.view === 'calendar') renderCalendar();
                         if (item.dataset.view === 'assignments') renderAssignments();
+                        if (item.dataset.view === 'folders') renderFolders();
                     });
                 }
             });
@@ -618,7 +659,7 @@
 
         // === EXPORT/IMPORT ALL ===
         function exportAllData() {
-            const json=JSON.stringify({customers,todos,assignments,assignmentEmployees,exportDate:new Date().toISOString()},null,2);
+            const json=JSON.stringify({customers,todos,assignments,assignmentEmployees,folderNotes,exportDate:new Date().toISOString()},null,2);
             downloadBlob(json,`openclaw-dashboard-backup-${new Date().toISOString().split('T')[0]}.json`,'application/json');
             showToast('All data exported','success');
         }
@@ -633,7 +674,8 @@
                         if(data.todos){todos=data.todos;localStorage.setItem('todos',JSON.stringify(todos));}
                         if(data.assignments){assignments=data.assignments;localStorage.setItem('assignments',JSON.stringify(assignments));}
                         if(data.assignmentEmployees){assignmentEmployees=data.assignmentEmployees;localStorage.setItem('assignmentEmployees',JSON.stringify(assignmentEmployees));}
-                        saveCustomers();renderCustomers();renderTodos();renderCalendar();renderAssignments();updateAssigneeFilter();
+                        if(data.folderNotes){folderNotes=data.folderNotes;localStorage.setItem('folderNotes',JSON.stringify(folderNotes));}
+                        saveCustomers();renderCustomers();renderTodos();renderCalendar();renderAssignments();renderFolders();updateAssigneeFilter();
                         showToast('Data imported','success');
                     }
                 }catch(err){showToast('Import error: '+err.message,'error');}
@@ -715,6 +757,88 @@
             assignmentEmployees = assignmentEmployees.filter(e => e !== name);
             assignments = assignments.filter(a => a.employeeName !== name);
             saveAssignments(); renderAssignments(); showToast('Employee removed');
+        }
+
+        // === CLIENT FOLDERS ===
+        let folderNotes = {}; // { customerId: [{ id, text, createdAt }] }
+        let currentFolderId = null;
+
+        function loadFolderNotes() {
+            const saved = localStorage.getItem('folderNotes');
+            if (saved) folderNotes = JSON.parse(saved);
+        }
+        function saveFolderNotes() { localStorage.setItem('folderNotes', JSON.stringify(folderNotes)); syncToCloud(); }
+
+        function renderFolders() {
+            const grid = document.getElementById('folders-grid');
+            if (!grid) return;
+            if (customers.length === 0) {
+                grid.innerHTML = '<p style="color:#888;text-align:center;padding:2rem;">No customers yet. Add one in the Customers tab!</p>';
+                return;
+            }
+            grid.innerHTML = customers.map(c => {
+                const noteCount = (folderNotes[c.id] || []).length;
+                return `<div class="folder-card" onclick="openFolder(${c.id})">
+                    <div class="folder-icon">📁</div>
+                    <div class="folder-name">${c.name}</div>
+                    <div class="folder-meta">${noteCount} note${noteCount!==1?'s':''}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function openFolder(customerId) {
+            currentFolderId = customerId;
+            const c = customers.find(x => x.id === customerId);
+            if (!c) return;
+            document.getElementById('folder-detail-name').textContent = '📁 ' + c.name;
+            document.getElementById('folder-detail-time').textContent = c.callDate ? new Date(c.callDate).toLocaleString() : 'Not set';
+            document.getElementById('folder-detail-customer-notes').textContent = c.notes || 'None';
+            document.getElementById('folder-new-note').value = '';
+            renderFolderNotes();
+            // Switch to folder-detail view
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('folder-detail').classList.add('active');
+        }
+
+        function closeFolderDetail() {
+            currentFolderId = null;
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('folders').classList.add('active');
+            renderFolders();
+        }
+
+        function renderFolderNotes() {
+            const notes = (folderNotes[currentFolderId] || []).sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+            const list = document.getElementById('folder-notes-list');
+            if (notes.length === 0) {
+                list.innerHTML = '<p style="color:#666;">No internal notes yet.</p>';
+                return;
+            }
+            list.innerHTML = notes.map(n => `<div class="note-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div class="note-time">${new Date(n.createdAt).toLocaleString()}</div>
+                    <span style="cursor:pointer;color:#888;font-size:0.8rem;" onclick="deleteFolderNote(${currentFolderId},${n.id})">🗑️</span>
+                </div>
+                <div class="note-text">${n.text}</div>
+            </div>`).join('');
+        }
+
+        function addFolderNote() {
+            const text = document.getElementById('folder-new-note').value.trim();
+            if (!text) return;
+            if (!folderNotes[currentFolderId]) folderNotes[currentFolderId] = [];
+            folderNotes[currentFolderId].push({ id: Date.now(), text, createdAt: new Date().toISOString() });
+            saveFolderNotes();
+            document.getElementById('folder-new-note').value = '';
+            renderFolderNotes();
+            showToast('Note added');
+        }
+
+        function deleteFolderNote(customerId, noteId) {
+            if (!confirm('Delete this note?')) return;
+            folderNotes[customerId] = (folderNotes[customerId]||[]).filter(n => n.id !== noteId);
+            saveFolderNotes(); renderFolderNotes();
+            showToast('Note deleted');
         }
 
         window.addEventListener('DOMContentLoaded', init);
