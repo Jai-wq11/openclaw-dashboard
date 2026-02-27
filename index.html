@@ -8,20 +8,24 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; overflow-x: hidden; }
         .container { display: flex; min-height: 100vh; }
+
         .sidebar { width: 250px; background: #16213e; padding: 2rem 1rem; border-right: 1px solid #0f3460; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
         .logo { font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; color: #e94560; }
         .nav-item { padding: 0.75rem 1rem; margin: 0.5rem 0; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; }
         .nav-item:hover { background: #0f3460; }
         .nav-item.active { background: #0f3460; color: #e94560; }
         .sidebar-divider { border-top: 1px solid #0f3460; margin: 1.5rem 0; }
+
         .main-content { flex: 1; padding: 2rem; max-width: 1400px; }
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         h1 { margin-bottom: 2rem; font-size: 2rem; }
+
         .stat-card { background: #16213e; padding: 1.5rem; border-radius: 12px; border: 1px solid #0f3460; }
         .stat-label { color: #888; font-size: 0.875rem; margin-bottom: 0.5rem; }
         .stat-value { font-size: 2rem; font-weight: 700; color: #e94560; }
+
         .table-controls { display: flex; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
         .search-bar { flex: 1; max-width: 400px; padding: 0.75rem; background: #16213e; border: 1px solid #0f3460; border-radius: 8px; color: #e0e0e0; font-size: 1rem; }
         .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s; font-weight: 500; }
@@ -32,30 +36,35 @@
         .btn-danger { background: #c92a3e; color: white; }
         .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
         .status-badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+
         table { width: 100%; border-collapse: collapse; background: #16213e; border-radius: 12px; overflow: hidden; }
         th { background: #0f3460; padding: 1rem; text-align: left; font-weight: 600; cursor: pointer; user-select: none; }
         th:hover { background: #1a4d7a; }
         td { padding: 1rem; border-top: 1px solid #0f3460; }
         tr:hover { background: #1a2844; }
-        input[type="text"], input[type="number"], input[type="date"], input[type="datetime-local"], select, textarea {
+
+        input[type="text"], input[type="number"], input[type="date"], input[type="datetime-local"], input[type="url"], select, textarea {
             width: 100%; padding: 0.5rem; background: #1a1a2e; border: 1px solid #0f3460; border-radius: 6px; color: #e0e0e0; font-size: 0.875rem;
         }
         input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
         textarea { min-height: 60px; resize: vertical; }
+
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
         .modal.active { display: flex; animation: fadeIn 0.2s; }
         .modal-content { background: #16213e; padding: 2rem; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid #0f3460; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .modal-header h2 { font-size: 1.5rem; }
-        .close-btn { background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer; padding: 0; width: 30px; height: 30px; }
-        .close-btn:hover { color: #e94560; }
+        .close-btn, .close-modal { background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer; padding: 0; }
+        .close-btn:hover, .close-modal:hover { color: #e94560; }
         .form-group { margin-bottom: 1.5rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; color: #888; font-size: 0.875rem; }
         .form-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; }
+
         .toast { position: fixed; bottom: 2rem; right: 2rem; background: #16213e; padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid #0f3460; z-index: 2000; animation: slideIn 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast.success { border-left: 4px solid #4caf50; }
         .toast.error { border-left: 4px solid #e94560; }
+
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         .calendar-nav { display: flex; gap: 1rem; align-items: center; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #0f3460; border: 1px solid #0f3460; border-radius: 12px; overflow: hidden; }
@@ -64,10 +73,18 @@
         .calendar-day:hover { background: #1a2844; }
         .calendar-day.other-month { opacity: 0.3; }
         .calendar-day-number { font-weight: 600; margin-bottom: 0.5rem; }
-        .calendar-event { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; margin: 0.25rem 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: #2196f3; }
+        .calendar-event { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; margin: 0.25rem 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .calendar-event.customer { background: #2196f3; }
+        .calendar-event.todo { background: #ff9800; }
+        .legend { display: flex; gap: 2rem; margin-bottom: 2rem; }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+
+        input[type="file"] { display: none; }
+
         @media (max-width: 768px) {
             .sidebar { width: 80px; padding: 1rem 0.5rem; }
-            .nav-item span { display: none; }
+            .nav-item span:not(.nav-icon) { display: none; }
             .logo { font-size: 1rem; }
             .main-content { padding: 1rem; }
             .table-controls { flex-direction: column; }
@@ -113,15 +130,18 @@
             <div class="view active" id="customers">
                 <h1>Customers</h1>
                 <div class="table-controls">
-                    <input type="text" class="search-bar" id="customer-search" placeholder="Search customers..." oninput="renderCustomers()">
-                    <button class="btn btn-primary" onclick="showAddCustomer()">+ Add Customer</button>
+                    <input type="text" class="search-bar" id="customer-search" placeholder="Search customers...">
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="exportCustomersCSV()">📥 Export CSV</button>
+                        <button class="btn btn-primary" onclick="showAddCustomer()">+ Add Customer</button>
+                    </div>
                 </div>
                 <div style="overflow-x: auto;">
                     <table>
                         <thead>
                             <tr>
-                                <th onclick="sortTable('customers','name')">Name</th>
-                                <th onclick="sortTable('customers','callDate')">Time</th>
+                                <th onclick="sortTable('customers', 'name')">Name</th>
+                                <th onclick="sortTable('customers', 'callDate')">Time</th>
                                 <th>Notes</th>
                                 <th>Actions</th>
                             </tr>
@@ -135,6 +155,16 @@
             <div class="view" id="calendar">
                 <h1>Calendar</h1>
                 <p style="color:#e94560;font-size:0.9rem;margin-bottom:10px;">⏰ All times shown in Hong Kong Time (HKT / GMT+8)</p>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #2196f3;"></div>
+                        <span>Customers</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff9800;"></div>
+                        <span>To-Do Due Dates</span>
+                    </div>
+                </div>
                 <div class="calendar-header">
                     <h2 id="calendar-month-year"></h2>
                     <div class="calendar-nav">
@@ -168,16 +198,16 @@
                     <thead>
                         <tr>
                             <th>Done</th>
-                            <th onclick="sortTable('todos','urgency')">Urgency</th>
-                            <th onclick="sortTable('todos','task')">Task</th>
-                            <th onclick="sortTable('todos','assignee')">Assigned To</th>
-                            <th onclick="sortTable('todos','dueDate')">Due Date</th>
-                            <th onclick="sortTable('todos','status')">Status</th>
+                            <th onclick="sortTable('todos', 'urgency')">Urgency</th>
+                            <th onclick="sortTable('todos', 'task')">Task</th>
+                            <th onclick="sortTable('todos', 'assignee')">Assigned To</th>
+                            <th onclick="sortTable('todos', 'dueDate')">Due Date</th>
+                            <th onclick="sortTable('todos', 'status')">Status</th>
                             <th>Notes</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="todos-table"></tbody>
+                    <tbody id="todos-tbody"></tbody>
                 </table>
             </div>
 
@@ -185,9 +215,18 @@
             <div class="view" id="expenses">
                 <h1>💸 Expenses</h1>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-                    <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-value" id="expenses-total">$0</div></div>
-                    <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value" id="expenses-month">$0</div></div>
-                    <div class="stat-card"><div class="stat-label">Budget Remaining</div><div class="stat-value" id="expenses-remaining">$0</div></div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Spent</div>
+                        <div class="stat-value" id="expenses-total">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value" id="expenses-month">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Budget Remaining</div>
+                        <div class="stat-value" id="expenses-remaining">$0</div>
+                    </div>
                 </div>
                 <div class="table-controls">
                     <input type="text" class="search-bar" id="expense-search" placeholder="Search expenses..." style="max-width:300px;" oninput="renderExpenses()">
@@ -235,9 +274,18 @@
             </div>
             <form id="customer-form">
                 <input type="hidden" id="customer-id">
-                <div class="form-group"><label>Name *</label><input type="text" id="customer-name" required></div>
-                <div class="form-group"><label>Time</label><input type="datetime-local" id="customer-calldate"></div>
-                <div class="form-group"><label>Notes</label><textarea id="customer-notes" rows="3"></textarea></div>
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Time (Call Date/Time)</label>
+                    <input type="datetime-local" id="customer-calldate">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="customer-notes" rows="4"></textarea>
+                </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('customer-modal')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
@@ -248,15 +296,19 @@
 
     <!-- Todo Modal -->
     <div class="modal" id="todo-modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width:500px">
             <div class="modal-header">
                 <h2 id="todo-modal-title">Add Task</h2>
-                <button class="close-btn" onclick="closeModal('todo-modal')">×</button>
+                <span class="close-modal" onclick="closeModal('todo-modal')">&times;</span>
             </div>
             <form id="todo-form" onsubmit="saveTodo(event)">
                 <input type="hidden" id="todo-id">
-                <div class="form-group"><label>Task</label><input type="text" id="todo-task" required placeholder="What needs to be done?"></div>
-                <div class="form-group"><label>Urgency</label>
+                <div class="form-group">
+                    <label>Task</label>
+                    <input type="text" id="todo-task" required placeholder="What needs to be done?">
+                </div>
+                <div class="form-group">
+                    <label>Urgency</label>
                     <select id="todo-urgency">
                         <option value="🔴 Critical">🔴 Critical</option>
                         <option value="🟡 High">🟡 High</option>
@@ -264,9 +316,20 @@
                         <option value="⚪ Low">⚪ Low</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Assigned To</label><select id="todo-assignee"><option value="Ty">Ty</option><option value="Jaiden">Jaiden</option><option value="Unassigned">Unassigned</option></select></div>
-                <div class="form-group"><label>Due Date</label><input type="date" id="todo-due-date"></div>
-                <div class="form-group"><label>Status</label>
+                <div class="form-group">
+                    <label>Assigned To</label>
+                    <select id="todo-assignee">
+                        <option value="Ty">Ty</option>
+                        <option value="Jaiden">Jaiden</option>
+                        <option value="Unassigned">Unassigned</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" id="todo-due-date">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
                     <select id="todo-status">
                         <option value="To Do">To Do</option>
                         <option value="In Progress">In Progress</option>
@@ -274,7 +337,10 @@
                         <option value="Done">Done</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Notes</label><textarea id="todo-notes" rows="2"></textarea></div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="todo-notes" rows="2"></textarea>
+                </div>
                 <button type="submit" class="btn btn-primary" style="width:100%">Save Task</button>
             </form>
         </div>
@@ -282,16 +348,23 @@
 
     <!-- Expense Modal -->
     <div class="modal" id="expense-modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width:500px">
             <div class="modal-header">
                 <h2 id="expense-modal-title">Add Expense</h2>
                 <button class="close-btn" onclick="closeModal('expense-modal')">×</button>
             </div>
             <form id="expense-form">
                 <input type="hidden" id="expense-id">
-                <div class="form-group"><label>Date *</label><input type="date" id="expense-date" required></div>
-                <div class="form-group"><label>Description *</label><input type="text" id="expense-description" required placeholder="What was it for?"></div>
-                <div class="form-group"><label>Category</label>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" id="expense-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <input type="text" id="expense-description" required placeholder="What was it for?">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
                     <select id="expense-category">
                         <option value="Software">Software</option>
                         <option value="API Keys">API Keys</option>
@@ -302,8 +375,12 @@
                         <option value="Other">Other</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Amount (USD) *</label><input type="number" id="expense-amount" required step="0.01" placeholder="0.00"></div>
-                <div class="form-group"><label>Payment Method</label>
+                <div class="form-group">
+                    <label>Amount (USD) *</label>
+                    <input type="number" id="expense-amount" required step="0.01" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
                     <select id="expense-payment-method">
                         <option value="">Select...</option>
                         <option value="Credit Card">Credit Card</option>
@@ -315,7 +392,10 @@
                         <option value="Other">Other</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Notes</label><textarea id="expense-notes" rows="2"></textarea></div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="expense-notes" rows="2"></textarea>
+                </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('expense-modal')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save</button>
@@ -324,7 +404,7 @@
         </div>
     </div>
 
-    <input type="file" id="import-file-input" accept=".json" onchange="importAllData(event)" style="display:none">
+    <input type="file" id="import-file-input" accept=".json" onchange="importAllData(event)">
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -333,65 +413,71 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const dbRef = db.ref('dashboard');
-        let firebaseReady = false, suppressFirebaseWrite = false;
+        let firebaseReady = false;
+        let suppressFirebaseWrite = false;
 
         let customers = [];
         let todos = [];
         let expenses = [];
-        let teamMembers = [];
+        let assignments = [];
+        let assignmentEmployees = [];
         let currentCalendarDate = new Date();
-        let sortDirection = {};
         const MONTHLY_BUDGET = 1280;
 
         function init() {
             loadData();
             renderCustomers();
-            renderCalendar();
             renderTodos();
             renderExpenses();
+            renderCalendar();
+            renderAssignments();
             setupNavigation();
             setupForms();
         }
 
         function loadData() {
-            customers = JSON.parse(localStorage.getItem('customers') || '[]');
-            todos = JSON.parse(localStorage.getItem('todos') || '[]');
-            expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
-            teamMembers = JSON.parse(localStorage.getItem('teamMembers') || '[{"id":1,"name":"Ty","role":"Admin","contact":"Telegram"},{"id":2,"name":"Jaiden","role":"Admin","contact":"WhatsApp"}]');
-            updateAssigneeDropdowns();
+            const sc = localStorage.getItem('customers');
+            if (sc) {
+                customers = JSON.parse(sc).map(c => ({ id: c.id, name: c.name || '', callDate: c.callDate || '', notes: c.notes || '' }));
+            }
+            const st = localStorage.getItem('todos');
+            if (st) todos = JSON.parse(st);
+            const se = localStorage.getItem('expenses');
+            if (se) expenses = JSON.parse(se);
+            const sa = localStorage.getItem('assignments');
+            if (sa) assignments = JSON.parse(sa);
+            const sae = localStorage.getItem('assignmentEmployees');
+            assignmentEmployees = sae ? JSON.parse(sae) : ['Ty', 'Jaiden'];
+            updateAssigneeFilter();
         }
 
-        function saveData() {
-            localStorage.setItem('customers', JSON.stringify(customers));
-            localStorage.setItem('todos', JSON.stringify(todos));
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            localStorage.setItem('teamMembers', JSON.stringify(teamMembers));
-            syncToCloud();
-        }
+        function saveCustomers() { localStorage.setItem('customers', JSON.stringify(customers)); syncToCloud(); }
+        function saveTodos() { localStorage.setItem('todos', JSON.stringify(todos)); syncToCloud(); }
+        function saveExpenses() { localStorage.setItem('expenses', JSON.stringify(expenses)); syncToCloud(); }
+        function saveAssignments() { localStorage.setItem('assignments', JSON.stringify(assignments)); localStorage.setItem('assignmentEmployees', JSON.stringify(assignmentEmployees)); syncToCloud(); }
 
+        // Firebase
         function getAllData() {
-            return { customers, todos, expenses, teamMembers, updatedAt: Date.now() };
+            return { customers, todos, expenses, assignments, assignmentEmployees, updatedAt: Date.now() };
         }
-
         function applyData(data) {
             if (data.customers) { customers = data.customers; localStorage.setItem('customers', JSON.stringify(customers)); }
             if (data.todos) { todos = data.todos; localStorage.setItem('todos', JSON.stringify(todos)); }
             if (data.expenses) { expenses = data.expenses; localStorage.setItem('expenses', JSON.stringify(expenses)); }
-            if (data.teamMembers) { teamMembers = data.teamMembers; localStorage.setItem('teamMembers', JSON.stringify(teamMembers)); }
+            if (data.assignments) { assignments = data.assignments; localStorage.setItem('assignments', JSON.stringify(assignments)); }
+            if (data.assignmentEmployees) { assignmentEmployees = data.assignmentEmployees; localStorage.setItem('assignmentEmployees', JSON.stringify(assignmentEmployees)); }
         }
-
         function syncToCloud() {
             if (!firebaseReady || suppressFirebaseWrite) return;
             dbRef.set(getAllData()).catch(err => console.error('Firebase write error:', err));
         }
-
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data || !data.updatedAt) { firebaseReady = true; syncToCloud(); return; }
             firebaseReady = true;
             suppressFirebaseWrite = true;
             applyData(data);
-            renderCustomers(); renderCalendar(); renderTodos(); renderExpenses(); updateAssigneeDropdowns();
+            renderCustomers(); renderTodos(); renderExpenses(); renderCalendar(); renderAssignments();
             suppressFirebaseWrite = false;
         });
 
@@ -405,38 +491,35 @@
                         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
                         document.getElementById(item.dataset.view).classList.add('active');
                         if (item.dataset.view === 'calendar') renderCalendar();
+                        if (item.dataset.view === 'assignments') renderAssignments();
                     });
                 }
             });
         }
 
-        // ===== CUSTOMERS =====
+        // === CUSTOMERS ===
         function renderCustomers() {
-            const search = (document.getElementById('customer-search')?.value || '').toLowerCase();
+            const search = document.getElementById('customer-search').value.toLowerCase();
             const filtered = customers.filter(c => c.name.toLowerCase().includes(search) || (c.notes||'').toLowerCase().includes(search));
             document.getElementById('customers-tbody').innerHTML = filtered.map(c => `
                 <tr>
                     <td>${c.name}</td>
-                    <td>${c.callDate ? new Date(c.callDate).toLocaleString() : '-'}</td>
-                    <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;">${c.notes || '-'}</td>
+                    <td>${c.callDate ? new Date(c.callDate).toLocaleString() : 'TBD'}</td>
+                    <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;">${c.notes||''}</td>
                     <td style="white-space:nowrap;">
                         <button class="btn btn-secondary btn-sm" onclick="editCustomer(${c.id})">✏️</button>
                         <button class="btn btn-danger btn-sm" onclick="deleteCustomer(${c.id})">🗑️</button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`).join('');
         }
-
         function showAddCustomer() {
             document.getElementById('customer-modal-title').textContent = 'Add Customer';
             document.getElementById('customer-form').reset();
             document.getElementById('customer-id').value = '';
             openModal('customer-modal');
         }
-
         function editCustomer(id) {
-            const c = customers.find(x => x.id === id);
-            if (!c) return;
+            const c = customers.find(x => x.id === id); if (!c) return;
             document.getElementById('customer-modal-title').textContent = 'Edit Customer';
             document.getElementById('customer-id').value = c.id;
             document.getElementById('customer-name').value = c.name;
@@ -444,181 +527,330 @@
             document.getElementById('customer-notes').value = c.notes || '';
             openModal('customer-modal');
         }
-
         function deleteCustomer(id) {
             if (!confirm('Delete this customer?')) return;
             customers = customers.filter(c => c.id !== id);
-            saveData(); renderCustomers(); renderCalendar();
+            saveCustomers(); renderCustomers(); renderCalendar();
             showToast('Customer deleted', 'success');
         }
-
-        // ===== CALENDAR =====
-        function renderCalendar() {
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-            document.getElementById('calendar-month-year').textContent = currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-            const firstDay = new Date(year, month, 1);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const startDay = firstDay.getDay();
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
-                const h = document.createElement('div'); h.className = 'calendar-day-header'; h.textContent = d; grid.appendChild(h);
-            });
-            const prevDays = new Date(year, month, 0).getDate();
-            for (let i = startDay - 1; i >= 0; i--) {
-                const d = document.createElement('div'); d.className = 'calendar-day other-month';
-                d.innerHTML = `<div class="calendar-day-number">${prevDays - i}</div>`; grid.appendChild(d);
-            }
-            for (let i = 1; i <= daysInMonth; i++) {
-                const d = document.createElement('div'); d.className = 'calendar-day';
-                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                const events = [];
-                customers.forEach(c => {
-                    if (c.callDate) {
-                        const cd = new Date(c.callDate);
-                        const cds = `${cd.getFullYear()}-${String(cd.getMonth()+1).padStart(2,'0')}-${String(cd.getDate()).padStart(2,'0')}`;
-                        if (cds === dateStr) {
-                            const t = cd.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-                            events.push(`${t} - ${c.name}`);
-                        }
-                    }
-                });
-                d.innerHTML = `<div class="calendar-day-number">${i}</div>${events.map(e => `<div class="calendar-event">${e}</div>`).join('')}`;
-                grid.appendChild(d);
-            }
-            const remaining = 42 - (startDay + daysInMonth);
-            for (let i = 1; i <= remaining; i++) {
-                const d = document.createElement('div'); d.className = 'calendar-day other-month';
-                d.innerHTML = `<div class="calendar-day-number">${i}</div>`; grid.appendChild(d);
-            }
+        function exportCustomersCSV() {
+            const csv = ['Name,Time,Notes', ...customers.map(c => `"${(c.name||'').replace(/"/g,'""')}","${c.callDate||''}","${(c.notes||'').replace(/"/g,'""')}"`)] .join('\n');
+            downloadBlob(csv, 'customers.csv', 'text/csv');
+            showToast('Exported CSV', 'success');
         }
 
-        function changeMonth(delta) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta); renderCalendar(); }
-        function goToToday() { currentCalendarDate = new Date(); renderCalendar(); }
-
-        // ===== TODOS =====
-        function updateAssigneeDropdowns() {
-            const names = [...new Set([...teamMembers.map(t => t.name), 'Unassigned'])];
-            const sel = document.getElementById('todo-assignee');
-            const filt = document.getElementById('todo-filter-assignee');
-            if (sel) sel.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
-            if (filt) filt.innerHTML = '<option value="">All Assignees</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
-        }
-
+        // === TODOS ===
         function renderTodos() {
-            const fu = document.getElementById('todo-filter-urgency')?.value || '';
-            const fa = document.getElementById('todo-filter-assignee')?.value || '';
+            const fu = document.getElementById('todo-filter-urgency').value;
+            const fa = document.getElementById('todo-filter-assignee').value;
             let filtered = todos;
             if (fu) filtered = filtered.filter(t => t.urgency === fu);
             if (fa) filtered = filtered.filter(t => t.assignee === fa);
             const uo = {'🔴 Critical':0,'🟡 High':1,'🔵 Medium':2,'⚪ Low':3};
-            filtered.sort((a,b) => { if (a.done !== b.done) return a.done ? 1 : -1; return (uo[a.urgency]||4)-(uo[b.urgency]||4); });
-            document.getElementById('todos-table').innerHTML = filtered.map(t => `
+            filtered.sort((a,b) => { if (a.done !== b.done) return a.done?1:-1; return (uo[a.urgency]||4)-(uo[b.urgency]||4); });
+            document.getElementById('todos-tbody').innerHTML = filtered.map(t => `
                 <tr style="${t.done?'opacity:0.5;text-decoration:line-through;':''}">
                     <td><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodoDone(${t.id})"></td>
-                    <td>${t.urgency}</td><td>${t.task}</td><td>${t.assignee}</td><td>${t.dueDate||'-'}</td>
+                    <td>${t.urgency}</td>
+                    <td>${t.task}</td>
+                    <td>${t.assignee}</td>
+                    <td>${t.dueDate||'-'}</td>
                     <td><span style="padding:0.25rem 0.75rem;border-radius:4px;background:${t.status==='Done'?'#1a472a':t.status==='In Progress'?'#0f3460':t.status==='Blocked'?'#5c1a1a':'#2a2a3e'};font-size:0.875rem;">${t.status}</span></td>
                     <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${t.notes||'-'}</td>
-                    <td style="white-space:nowrap;"><button class="btn btn-secondary btn-sm" onclick="editTodo(${t.id})">✏️</button> <button class="btn btn-danger btn-sm" onclick="deleteTodo(${t.id})">🗑️</button></td>
-                </tr>
-            `).join('');
+                    <td style="white-space:nowrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="editTodo(${t.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTodo(${t.id})">🗑️</button>
+                    </td>
+                </tr>`).join('');
         }
-
-        function showAddTodo() { document.getElementById('todo-modal-title').textContent='Add Task'; document.getElementById('todo-form').reset(); document.getElementById('todo-id').value=''; openModal('todo-modal'); }
+        function showAddTodo() {
+            document.getElementById('todo-modal-title').textContent = 'Add Task';
+            document.getElementById('todo-form').reset();
+            document.getElementById('todo-id').value = '';
+            openModal('todo-modal');
+        }
         function editTodo(id) {
-            const t = todos.find(x=>x.id===id); if(!t) return;
-            document.getElementById('todo-modal-title').textContent='Edit Task';
-            document.getElementById('todo-id').value=t.id; document.getElementById('todo-task').value=t.task;
-            document.getElementById('todo-urgency').value=t.urgency; document.getElementById('todo-assignee').value=t.assignee;
-            document.getElementById('todo-due-date').value=t.dueDate; document.getElementById('todo-status').value=t.status;
-            document.getElementById('todo-notes').value=t.notes; openModal('todo-modal');
+            const t = todos.find(x => x.id === id); if (!t) return;
+            document.getElementById('todo-modal-title').textContent = 'Edit Task';
+            document.getElementById('todo-id').value = t.id;
+            document.getElementById('todo-task').value = t.task;
+            document.getElementById('todo-urgency').value = t.urgency;
+            document.getElementById('todo-assignee').value = t.assignee;
+            document.getElementById('todo-due-date').value = t.dueDate;
+            document.getElementById('todo-status').value = t.status;
+            document.getElementById('todo-notes').value = t.notes;
+            openModal('todo-modal');
         }
         function saveTodo(e) {
             e.preventDefault();
             const id = document.getElementById('todo-id').value;
-            const todo = { id: id?parseInt(id):Date.now(), task: document.getElementById('todo-task').value, urgency: document.getElementById('todo-urgency').value, assignee: document.getElementById('todo-assignee').value, dueDate: document.getElementById('todo-due-date').value, status: document.getElementById('todo-status').value, notes: document.getElementById('todo-notes').value, done: id ? todos.find(t=>t.id===parseInt(id))?.done||false : false };
-            if (id) { const idx = todos.findIndex(t=>t.id===parseInt(id)); todos[idx]=todo; } else { todos.push(todo); }
-            saveData(); closeModal('todo-modal'); renderTodos(); showToast(id?'Task updated!':'Task added!');
+            const todo = {
+                id: id ? parseInt(id) : Date.now(),
+                task: document.getElementById('todo-task').value,
+                urgency: document.getElementById('todo-urgency').value,
+                assignee: document.getElementById('todo-assignee').value,
+                dueDate: document.getElementById('todo-due-date').value,
+                status: document.getElementById('todo-status').value,
+                notes: document.getElementById('todo-notes').value,
+                done: id ? (todos.find(t=>t.id===parseInt(id))?.done||false) : false
+            };
+            if (id) { const idx = todos.findIndex(t=>t.id===parseInt(id)); todos[idx]=todo; }
+            else todos.push(todo);
+            saveTodos(); renderTodos(); renderCalendar(); closeModal('todo-modal');
+            showToast(id?'Task updated!':'Task added!');
         }
-        function deleteTodo(id) { if(!confirm('Delete?')) return; todos=todos.filter(t=>t.id!==id); saveData(); renderTodos(); showToast('Deleted'); }
-        function toggleTodoDone(id) { const t=todos.find(x=>x.id===id); if(t){t.done=!t.done; if(t.done)t.status='Done'; saveData(); renderTodos();} }
+        function deleteTodo(id) {
+            if (!confirm('Delete this task?')) return;
+            todos = todos.filter(t=>t.id!==id);
+            saveTodos(); renderTodos(); renderCalendar();
+            showToast('Task deleted');
+        }
+        function toggleTodoDone(id) {
+            const t = todos.find(x=>x.id===id);
+            if (t) { t.done=!t.done; if(t.done) t.status='Done'; saveTodos(); renderTodos(); }
+        }
+        function updateAssigneeFilter() {
+            const names = [...new Set(todos.map(t=>t.assignee).filter(Boolean))];
+            const sel = document.getElementById('todo-filter-assignee');
+            sel.innerHTML = '<option value="">All Assignees</option>' + names.map(n=>`<option value="${n}">${n}</option>`).join('');
+        }
 
-        // ===== EXPENSES =====
+        // === EXPENSES ===
         function renderExpenses() {
             const search = (document.getElementById('expense-search')?.value||'').toLowerCase();
-            const cat = document.getElementById('expense-filter-category')?.value||'';
-            const filtered = expenses.filter(ex => (ex.description.toLowerCase().includes(search)||(ex.notes||'').toLowerCase().includes(search)) && (!cat||ex.category===cat)).sort((a,b)=>b.date.localeCompare(a.date));
+            const catFilter = document.getElementById('expense-filter-category')?.value||'';
+            const filtered = expenses.filter(ex =>
+                (ex.description.toLowerCase().includes(search)||(ex.notes||'').toLowerCase().includes(search)) &&
+                (!catFilter||ex.category===catFilter)
+            ).sort((a,b) => b.date.localeCompare(a.date));
+
             document.getElementById('expenses-tbody').innerHTML = filtered.map(ex => `
-                <tr><td>${ex.date}</td><td>${ex.description}</td><td><span class="status-badge" style="background:#0f3460;color:#e94560;">${ex.category}</span></td><td style="font-weight:600;color:#e94560;">$${ex.amount.toFixed(2)}</td><td>${ex.paymentMethod||''}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;">${ex.notes||''}</td><td style="white-space:nowrap;"><button class="btn btn-secondary btn-sm" onclick="editExpense(${ex.id})">✏️</button> <button class="btn btn-danger btn-sm" onclick="deleteExpense(${ex.id})">🗑️</button></td></tr>
-            `).join('');
-            const now = new Date(), ms = now.toISOString().slice(0,7);
-            const total = expenses.reduce((s,ex)=>s+ex.amount,0);
-            const monthSpent = expenses.filter(ex=>ex.date.startsWith(ms)).reduce((s,ex)=>s+ex.amount,0);
-            document.getElementById('expenses-total').textContent='$'+total.toFixed(2);
-            document.getElementById('expenses-month').textContent='$'+monthSpent.toFixed(2);
-            const rem = MONTHLY_BUDGET-monthSpent;
-            document.getElementById('expenses-remaining').textContent='$'+rem.toFixed(2);
-            document.getElementById('expenses-remaining').style.color=rem<200?'#e94560':'#4ade80';
+                <tr>
+                    <td>${ex.date}</td>
+                    <td>${ex.description}</td>
+                    <td><span class="status-badge" style="background:#0f3460;color:#e94560;">${ex.category}</span></td>
+                    <td style="font-weight:600;color:#e94560;">$${ex.amount.toFixed(2)}</td>
+                    <td>${ex.paymentMethod||''}</td>
+                    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;">${ex.notes||''}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="editExpense(${ex.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteExpense(${ex.id})">🗑️</button>
+                    </td>
+                </tr>`).join('');
+
+            const now = new Date();
+            const monthStr = now.toISOString().slice(0,7);
+            const totalSpent = expenses.reduce((s,ex)=>s+ex.amount,0);
+            const monthSpent = expenses.filter(ex=>ex.date.startsWith(monthStr)).reduce((s,ex)=>s+ex.amount,0);
+            document.getElementById('expenses-total').textContent = '$'+totalSpent.toFixed(2);
+            document.getElementById('expenses-month').textContent = '$'+monthSpent.toFixed(2);
+            const remaining = MONTHLY_BUDGET - monthSpent;
+            document.getElementById('expenses-remaining').textContent = '$'+remaining.toFixed(2);
+            document.getElementById('expenses-remaining').style.color = remaining<200?'#e94560':'#4ade80';
         }
-        function showAddExpense() { document.getElementById('expense-modal-title').textContent='Add Expense'; document.getElementById('expense-form').reset(); document.getElementById('expense-id').value=''; document.getElementById('expense-date').value=new Date().toISOString().split('T')[0]; openModal('expense-modal'); }
-        function editExpense(id) {
-            const ex=expenses.find(e=>e.id===id); if(!ex)return;
-            document.getElementById('expense-modal-title').textContent='Edit Expense'; document.getElementById('expense-id').value=ex.id;
-            document.getElementById('expense-date').value=ex.date; document.getElementById('expense-description').value=ex.description;
-            document.getElementById('expense-category').value=ex.category; document.getElementById('expense-amount').value=ex.amount;
-            document.getElementById('expense-payment-method').value=ex.paymentMethod||''; document.getElementById('expense-notes').value=ex.notes||'';
+        function showAddExpense() {
+            document.getElementById('expense-modal-title').textContent = 'Add Expense';
+            document.getElementById('expense-form').reset();
+            document.getElementById('expense-id').value = '';
+            document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
             openModal('expense-modal');
         }
-        function deleteExpense(id) { if(!confirm('Delete?')) return; expenses=expenses.filter(ex=>ex.id!==id); saveData(); renderExpenses(); showToast('Deleted'); }
+        function editExpense(id) {
+            const ex = expenses.find(e=>e.id===id); if(!ex) return;
+            document.getElementById('expense-modal-title').textContent = 'Edit Expense';
+            document.getElementById('expense-id').value = ex.id;
+            document.getElementById('expense-date').value = ex.date;
+            document.getElementById('expense-description').value = ex.description;
+            document.getElementById('expense-category').value = ex.category;
+            document.getElementById('expense-amount').value = ex.amount;
+            document.getElementById('expense-payment-method').value = ex.paymentMethod||'';
+            document.getElementById('expense-notes').value = ex.notes||'';
+            openModal('expense-modal');
+        }
+        function deleteExpense(id) {
+            if(!confirm('Delete this expense?')) return;
+            expenses = expenses.filter(ex=>ex.id!==id);
+            saveExpenses(); renderExpenses();
+            showToast('Expense deleted','success');
+        }
         function exportExpensesCSV() {
-            const csv = ['Date,Description,Category,Amount,Payment Method,Notes', ...expenses.map(ex=>`${ex.date},"${ex.description}",${ex.category},${ex.amount.toFixed(2)},${ex.paymentMethod||''},"${ex.notes||''}"`)].join('\n');
-            const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=`expenses-${new Date().toISOString().split('T')[0]}.csv`; a.click(); showToast('Exported');
+            const csv = ['Date,Description,Category,Amount,Payment Method,Notes',
+                ...expenses.map(ex=>`${ex.date},"${ex.description}",${ex.category},${ex.amount.toFixed(2)},${ex.paymentMethod||''},"${(ex.notes||'').replace(/"/g,'""')}"`)
+            ].join('\n');
+            downloadBlob(csv, `expenses-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+            showToast('Expenses exported','success');
         }
 
-        // ===== FORMS =====
+        // === CALENDAR ===
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
+            document.getElementById('calendar-month-year').textContent = currentCalendarDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+            const startDay = new Date(year,month,1).getDay();
+            const daysInMonth = new Date(year,month+1,0).getDate();
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+                const h = document.createElement('div'); h.className='calendar-day-header'; h.textContent=d; grid.appendChild(h);
+            });
+            const prevDays = new Date(year,month,0).getDate();
+            for (let i=startDay-1;i>=0;i--) { const d=document.createElement('div'); d.className='calendar-day other-month'; d.innerHTML=`<div class="calendar-day-number">${prevDays-i}</div>`; grid.appendChild(d); }
+            for (let i=1;i<=daysInMonth;i++) {
+                const d=document.createElement('div'); d.className='calendar-day';
+                const date=new Date(year,month,i); const events=getEventsForDate(date);
+                d.innerHTML=`<div class="calendar-day-number">${i}</div>${events.map(e=>`<div class="calendar-event ${e.type}">${e.text}</div>`).join('')}`;
+                if(events.length){d.style.cursor='pointer';d.onclick=()=>showDayDetail(date,events);}
+                grid.appendChild(d);
+            }
+            const rem=42-(startDay+daysInMonth);
+            for(let i=1;i<=rem;i++){const d=document.createElement('div');d.className='calendar-day other-month';d.innerHTML=`<div class="calendar-day-number">${i}</div>`;grid.appendChild(d);}
+        }
+        function getEventsForDate(date) {
+            const events=[];
+            const ds=date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+            customers.forEach(c=>{if(c.callDate){const cd=new Date(c.callDate);const cds=cd.getFullYear()+'-'+String(cd.getMonth()+1).padStart(2,'0')+'-'+String(cd.getDate()).padStart(2,'0');if(cds===ds){events.push({type:'customer',text:`${cd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})} - ${c.name}`});}}});
+            todos.forEach(t=>{if(t.dueDate===ds&&!t.done){events.push({type:'todo',text:`📋 ${t.task}`});}});
+            return events;
+        }
+        function showDayDetail(date,events) {
+            const dateStr=date.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+            const html=events.map(e=>`<div style="padding:10px;margin:8px 0;border-radius:8px;background:${e.type==='customer'?'#0f3460':'#4a3000'};border-left:4px solid ${e.type==='customer'?'#4a90d9':'#ff9800'};"><strong>${e.text}</strong><div style="font-size:0.85rem;color:#aaa;margin-top:4px;">${e.type==='customer'?'Customer':'To-Do'}</div></div>`).join('');
+            let modal=document.getElementById('day-detail-modal');
+            if(!modal){modal=document.createElement('div');modal.id='day-detail-modal';modal.className='modal';modal.innerHTML=`<div class="modal-content" style="max-width:500px"><span class="close-modal" onclick="closeModal('day-detail-modal')">&times;</span><h2 id="day-detail-title"></h2><div id="day-detail-events"></div></div>`;document.body.appendChild(modal);}
+            document.getElementById('day-detail-title').textContent='📅 '+dateStr;
+            document.getElementById('day-detail-events').innerHTML=html;
+            openModal('day-detail-modal');
+        }
+        function changeMonth(d){currentCalendarDate.setMonth(currentCalendarDate.getMonth()+d);renderCalendar();}
+        function goToToday(){currentCalendarDate=new Date();renderCalendar();}
+
+        // === FORMS SETUP ===
         function setupForms() {
+            document.getElementById('customer-search').addEventListener('input', renderCustomers);
             document.getElementById('customer-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const id = document.getElementById('customer-id').value;
-                const c = { id: id?parseInt(id):Date.now(), name: document.getElementById('customer-name').value, callDate: document.getElementById('customer-calldate').value, notes: document.getElementById('customer-notes').value };
-                if (id) { const idx=customers.findIndex(x=>x.id===parseInt(id)); customers[idx]=c; } else { customers.push(c); }
-                saveData(); renderCustomers(); renderCalendar(); closeModal('customer-modal'); showToast('Customer saved','success');
+                const id=document.getElementById('customer-id').value;
+                const c={id:id?parseInt(id):Date.now(),name:document.getElementById('customer-name').value,callDate:document.getElementById('customer-calldate').value,notes:document.getElementById('customer-notes').value};
+                if(id){const idx=customers.findIndex(x=>x.id===parseInt(id));customers[idx]=c;}else customers.push(c);
+                saveCustomers();renderCustomers();renderCalendar();closeModal('customer-modal');showToast('Customer saved','success');
             });
             document.getElementById('expense-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const id = document.getElementById('expense-id').value;
-                const ex = { id: id?parseInt(id):Date.now(), date: document.getElementById('expense-date').value, description: document.getElementById('expense-description').value, category: document.getElementById('expense-category').value, amount: parseFloat(document.getElementById('expense-amount').value), paymentMethod: document.getElementById('expense-payment-method').value, notes: document.getElementById('expense-notes').value };
-                if (id) { const idx=expenses.findIndex(x=>x.id===parseInt(id)); expenses[idx]=ex; } else { expenses.push(ex); }
-                saveData(); renderExpenses(); closeModal('expense-modal'); showToast('Expense saved','success');
+                const id=document.getElementById('expense-id').value;
+                const ex={id:id?parseInt(id):Date.now(),date:document.getElementById('expense-date').value,description:document.getElementById('expense-description').value,category:document.getElementById('expense-category').value,amount:parseFloat(document.getElementById('expense-amount').value),paymentMethod:document.getElementById('expense-payment-method').value,notes:document.getElementById('expense-notes').value};
+                if(id){const idx=expenses.findIndex(x=>x.id===parseInt(id));expenses[idx]=ex;}else expenses.push(ex);
+                saveExpenses();renderExpenses();closeModal('expense-modal');showToast('Expense saved','success');
             });
         }
 
-        // ===== SORT =====
-        function sortTable(table, field) {
+        // === SORT ===
+        let sortDirection={};
+        function sortTable(table,field) {
             const key=`${table}-${field}`; sortDirection[key]=!sortDirection[key];
-            const data = table==='customers'?customers:table==='todos'?todos:expenses;
-            data.sort((a,b)=>{ let av=a[field]||'',bv=b[field]||''; if(typeof av==='string')av=av.toLowerCase(); if(typeof bv==='string')bv=bv.toLowerCase(); return sortDirection[key]?(av<bv?-1:1):(av>bv?-1:1); });
-            if(table==='customers')renderCustomers(); if(table==='todos')renderTodos(); if(table==='expenses')renderExpenses();
+            const data=table==='customers'?customers:table==='todos'?todos:expenses;
+            data.sort((a,b)=>{let av=a[field]||'',bv=b[field]||'';if(typeof av==='string')av=av.toLowerCase();if(typeof bv==='string')bv=bv.toLowerCase();if(av<bv)return sortDirection[key]?-1:1;if(av>bv)return sortDirection[key]?1:-1;return 0;});
+            if(table==='customers')renderCustomers();if(table==='todos')renderTodos();if(table==='expenses')renderExpenses();
         }
 
-        // ===== EXPORT/IMPORT =====
+        // === EXPORT/IMPORT ALL ===
         function exportAllData() {
-            const json=JSON.stringify(getAllData(),null,2);
-            const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));
-            a.download=`openclaw-backup-${new Date().toISOString().split('T')[0]}.json`; a.click(); showToast('Exported','success');
+            const json=JSON.stringify({customers,todos,expenses,exportDate:new Date().toISOString()},null,2);
+            downloadBlob(json,`openclaw-dashboard-backup-${new Date().toISOString().split('T')[0]}.json`,'application/json');
+            showToast('All data exported','success');
         }
         function importAllData(event) {
             const file=event.target.files[0]; if(!file) return;
             const reader=new FileReader();
-            reader.onload=(e)=>{ try { const data=JSON.parse(e.target.result); if(confirm('Replace all data?')){ applyData(data); saveData(); renderCustomers();renderCalendar();renderTodos();renderExpenses();updateAssigneeDropdowns(); showToast('Imported','success'); } } catch(err){ showToast('Error: '+err.message,'error'); } };
+            reader.onload=(e)=>{
+                try{
+                    const data=JSON.parse(e.target.result);
+                    if(confirm('This will replace all current data. Continue?')){
+                        if(data.customers)customers=data.customers;
+                        if(data.todos){todos=data.todos;localStorage.setItem('todos',JSON.stringify(todos));}
+                        if(data.expenses){expenses=data.expenses;localStorage.setItem('expenses',JSON.stringify(expenses));}
+                        saveCustomers();renderCustomers();renderTodos();renderExpenses();renderCalendar();updateAssigneeFilter();
+                        showToast('Data imported','success');
+                    }
+                }catch(err){showToast('Import error: '+err.message,'error');}
+            };
             reader.readAsText(file); event.target.value='';
         }
 
-        // ===== UTILS =====
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function showToast(msg, type='success') { const t=document.createElement('div'); t.className=`toast ${type}`; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
+        // === UTILITIES ===
+        function openModal(id){document.getElementById(id).classList.add('active');}
+        function closeModal(id){document.getElementById(id).classList.remove('active');}
+        function showToast(msg,type='success'){const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
+        function downloadBlob(content,filename,type){const b=new Blob([content],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=filename;a.click();URL.revokeObjectURL(u);}
+
+        // ===== ASSIGNMENTS =====
+        function renderAssignments() {
+            const assignedCustomerIds = assignments.map(a => a.customerId);
+            const unassigned = customers.filter(c => !assignedCustomerIds.includes(c.id));
+            const container = document.getElementById('unassigned-customers');
+            if (container) {
+                container.innerHTML = unassigned.length === 0 ? '<div style="color:#888;text-align:center;padding:1rem;">All customers assigned</div>' :
+                    unassigned.map(c => `<div class="drag-card" draggable="true" ondragstart="onDragStart(event, ${c.id}, '${c.name.replace(/'/g,"\\'")}', '${c.callDate||''}')">${c.name}${c.callDate ? ' <span style="color:#888;font-size:0.8rem;">'+new Date(c.callDate).toLocaleString()+'</span>' : ''}</div>`).join('');
+            }
+            const zones = document.getElementById('employees-drop-zones');
+            if (zones) {
+                zones.innerHTML = assignmentEmployees.map(emp => {
+                    const empAssignments = assignments.filter(a => a.employeeName === emp);
+                    return `<div class="employee-section">
+                        <div class="employee-header"><h4>${emp}</h4><span class="employee-remove" onclick="removeAssignmentEmployee('${emp}')">remove</span></div>
+                        <div class="drop-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, '${emp}')" data-employee="${emp}">
+                            ${empAssignments.length === 0 ? '<div style="color:#666;text-align:center;font-size:0.85rem;">Drop customers here</div>' :
+                            empAssignments.map(a => `<div class="assigned-card">
+                                <div><strong>${a.customerName}</strong><br><span style="color:#888;font-size:0.8rem;">${a.callTime ? new Date(a.callTime).toLocaleString() : 'No time set'}</span>${a.goals ? '<br><span style="font-size:0.8rem;color:#aaa;">'+a.goals+'</span>' : ''}</div>
+                                <span class="remove-btn" onclick="removeAssignment(${a.id})">❌</span>
+                            </div>`).join('')}
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        let dragData = {};
+        function onDragStart(e, customerId, customerName, callDate) {
+            dragData = { customerId, customerName, callDate };
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', customerId);
+        }
+        function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+        function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+        function onDrop(e, employeeName) {
+            e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+            document.getElementById('assign-customer-id').value = dragData.customerId;
+            document.getElementById('assign-customer-name').value = dragData.customerName;
+            document.getElementById('assign-employee-name').value = employeeName;
+            document.getElementById('assign-customer-display').value = dragData.customerName;
+            document.getElementById('assign-employee-display').value = employeeName;
+            document.getElementById('assign-call-time').value = dragData.callDate || '';
+            document.getElementById('assign-goals').value = '';
+            openModal('assignment-modal');
+        }
+        function saveAssignment(e) {
+            e.preventDefault();
+            assignments.push({
+                id: Date.now(),
+                customerId: parseInt(document.getElementById('assign-customer-id').value),
+                customerName: document.getElementById('assign-customer-name').value,
+                employeeName: document.getElementById('assign-employee-name').value,
+                callTime: document.getElementById('assign-call-time').value,
+                goals: document.getElementById('assign-goals').value
+            });
+            saveAssignments(); closeModal('assignment-modal'); renderAssignments(); showToast('Customer assigned!');
+        }
+        function removeAssignment(id) { assignments = assignments.filter(a => a.id !== id); saveAssignments(); renderAssignments(); showToast('Unassigned'); }
+        function addAssignmentEmployee() {
+            const name = prompt('Employee name:'); if (!name || !name.trim()) return;
+            if (assignmentEmployees.includes(name.trim())) { showToast('Already exists', 'error'); return; }
+            assignmentEmployees.push(name.trim()); saveAssignments(); renderAssignments(); showToast('Employee added');
+        }
+        function removeAssignmentEmployee(name) {
+            if (!confirm(`Remove ${name}? Their assignments will also be removed.`)) return;
+            assignmentEmployees = assignmentEmployees.filter(e => e !== name);
+            assignments = assignments.filter(a => a.employeeName !== name);
+            saveAssignments(); renderAssignments(); showToast('Employee removed');
+        }
 
         window.addEventListener('DOMContentLoaded', init);
     </script>
