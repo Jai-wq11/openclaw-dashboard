@@ -385,6 +385,10 @@
         </div>
     </div>
 
+    <footer style="position:fixed;bottom:0;right:0;padding:6px 14px;font-size:0.7rem;color:#555;background:#16213e;border-top:1px solid #0f3460;border-left:1px solid #0f3460;border-radius:8px 0 0 0;">
+        Last updated: Feb 28, 2026
+    </footer>
+
     <input type="file" id="import-file-input" accept=".json" onchange="importAllData(event)">
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -696,7 +700,10 @@
             const container = document.getElementById('unassigned-customers');
             if (container) {
                 container.innerHTML = unassigned.length === 0 ? '<div style="color:#888;text-align:center;padding:1rem;">All customers assigned</div>' :
-                    unassigned.map(c => `<div class="drag-card" draggable="true" ondragstart="onDragStart(event, ${c.id}, '${c.name.replace(/'/g,"\\'")}', '${c.callDate||''}')">${c.name}${c.callDate ? ' <span style="color:#888;font-size:0.8rem;">'+new Date(c.callDate).toLocaleString()+'</span>' : ''}</div>`).join('');
+                    unassigned.map(c => {
+                        const safeName = c.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+                        return `<div class="drag-card" draggable="true" ondragstart="onDragStart(event, ${c.id}, '${safeName}', '${c.callDate||''}')">${safeName}${c.callDate ? ' <span style="color:#888;font-size:0.8rem;">'+new Date(c.callDate).toLocaleString()+'</span>' : ''}</div>`;
+                    }).join('');
             }
             const zones = document.getElementById('employees-drop-zones');
             if (zones) {
@@ -718,9 +725,10 @@
 
         let dragData = {};
         function onDragStart(e, customerId, customerName, callDate) {
-            dragData = { customerId, customerName, callDate };
+            const c = customers.find(x => x.id === customerId);
+            dragData = { customerId, customerName: c ? c.name : customerName, callDate };
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', customerId);
+            e.dataTransfer.setData('text/plain', String(customerId));
         }
         function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
         function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
