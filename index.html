@@ -380,14 +380,18 @@ function changeMonth(dir) { calMonth += dir; if (calMonth > 11) { calMonth = 0; 
 // ASSIGNMENTS
 function renderAssignments() {
   const empSection = document.getElementById('employees-section');
-  empSection.innerHTML = '<div class="cards">' + EMPLOYEES.map(e => `
-    <div class="employee-card">
+  empSection.innerHTML = '<div class="cards">' + EMPLOYEES.map(e => {
+    const empEvents = Object.values(DATA.events||{}).filter(ev => ev.title && ev.title.includes(e.name) && new Date(ev.date+'T'+(ev.time||'00:00')) >= new Date()).sort((a,b) => new Date(a.date) - new Date(b.date));
+    const nextCall = empEvents.length ? empEvents[0] : null;
+    return `<div class="employee-card">
       <h3><i class="fas fa-user"></i> ${e.name}</h3>
       <div class="card-row"><span class="label">Rate</span><span class="value">${e.rate}</span></div>
       ${e.sheet ? `<a href="${e.sheet}" target="_blank" class="drive-link"><i class="fas fa-clock"></i> Time Tracking</a>` : '<span style="font-size:.8rem;color:var(--text-muted)">No timesheet</span>'}
       <div style="margin-top:8px;font-size:.8rem;color:var(--text-muted)">Clients: ${Object.values(DATA.customers||{}).filter(c=>(c.employee||'').toLowerCase()===e.name.toLowerCase()).map(c=>c.name).join(', ')||'None'}</div>
-    </div>
-  `).join('') + '</div>';
+      ${nextCall ? `<div style="margin-top:8px"><span class="badge badge-info">${nextCall.date} ${nextCall.time} — ${esc(nextCall.title)}</span></div>` : ''}
+      <div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="showScheduleEmployeeCall('${e.id}','${e.name}')"><i class="fas fa-phone"></i> Schedule Call</button></div>
+    </div>`;
+  }).join('') + '</div>';
 
   const tbody = document.getElementById('assignments-tbody');
   const events = Object.entries(DATA.events||{});
@@ -415,6 +419,38 @@ function renderAssignments() {
 }
 
 function assignEmployee(cid, emp) { DATA.customers[cid].employee = emp; saveData(); }
+
+function showScheduleEmployeeCall(empId, empName) {
+  const clients = Object.entries(DATA.customers||{}).filter(([id,c]) => (c.employee||'').toLowerCase() === empName.toLowerCase());
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `<h2><i class="fas fa-phone" style="margin-right:8px"></i> Schedule Call with ${esc(empName)}</h2>
+    <div class="form-group"><label>Date</label><input type="date" id="m-emp-date"></div>
+    <div class="form-group"><label>Time (HKT)</label><input type="time" id="m-emp-time"></div>
+    <div class="form-group"><label>Client (optional)</label>
+      <select id="m-emp-client">
+        <option value="">Internal / No client</option>
+        ${Object.entries(DATA.customers||{}).map(([id,c]) => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group"><label>Call Title</label><input id="m-emp-title" value="Call with ${esc(empName)}" placeholder="e.g. Setup Call, Check-in"></div>
+    <div class="form-group"><label>Notes (optional)</label><textarea id="m-emp-notes" rows="2" placeholder="Agenda, prep notes..."></textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEmployeeCall('${empId}','${esc(empName)}')"><i class="fas fa-calendar-check"></i> Schedule</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function saveEmployeeCall(empId, empName) {
+  const date = document.getElementById('m-emp-date').value;
+  const time = document.getElementById('m-emp-time').value;
+  const client = document.getElementById('m-emp-client').value;
+  const title = document.getElementById('m-emp-title').value;
+  const notes = document.getElementById('m-emp-notes').value;
+  if (!date || !time) { alert('Please select a date and time.'); return; }
+  DATA.events[uid()] = { date, time, title: title + (client ? ' — ' + client : ''), client: client || '' };
+  saveData(); closeModal();
+}
 
 function showScheduleCall(customerId) {
   const c = DATA.customers[customerId];
