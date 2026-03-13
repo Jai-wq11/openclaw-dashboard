@@ -112,11 +112,11 @@ textarea{resize:vertical;min-height:60px}
 <nav class="sidebar" id="sidebar">
   <div class="logo"><i class="fas fa-bolt"></i> OpenClaw</div>
   <div class="nav-item active" onclick="switchTab('customers')"><i class="fas fa-users"></i> Customers</div>
-  <!-- calendar removed -->
+  <div class="nav-item" onclick="switchTab('calendar')"><i class="fas fa-calendar-alt"></i> Calendar</div>
   <div class="nav-item" onclick="switchTab('assignments')"><i class="fas fa-user-tag"></i> Assignments</div>
   <div class="nav-item" onclick="switchTab('projects')"><i class="fas fa-project-diagram"></i> Projects</div>
   <div class="nav-item" onclick="switchTab('todos')"><i class="fas fa-check-square"></i> To-Do List</div>
-  <div class="nav-item" onclick="switchTab('briefs')"><i class="fas fa-folder-open"></i> Client Briefs</div>
+  <!-- briefs removed -->
   <div class="nav-item" onclick="switchTab('meetings')"><i class="fas fa-microphone-alt"></i> Meeting Briefs</div>
 </nav>
 
@@ -129,7 +129,16 @@ textarea{resize:vertical;min-height:60px}
     <div class="cards" id="customers-grid"></div>
   </div>
 
-  <!-- calendar removed -->
+  <!-- CALENDAR -->
+  <div class="tab-content" id="tab-calendar">
+    <div class="top-bar"><h1>Calendar</h1><button class="btn btn-primary" onclick="showModal('event')"><i class="fas fa-plus"></i> Add Event</button></div>
+    <div class="cal-nav">
+      <button class="btn btn-outline btn-sm" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+      <h2 id="cal-month-label"></h2>
+      <button class="btn btn-outline btn-sm" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+  </div>
 
   <!-- ASSIGNMENTS -->
   <div class="tab-content" id="tab-assignments">
@@ -155,12 +164,6 @@ textarea{resize:vertical;min-height:60px}
   <div class="tab-content" id="tab-todos">
     <div class="top-bar"><h1>To-Do List</h1><button class="btn btn-primary" onclick="showModal('todo')"><i class="fas fa-plus"></i> Add Task</button></div>
     <div id="todos-list"></div>
-  </div>
-
-  <!-- BRIEFS -->
-  <div class="tab-content" id="tab-briefs">
-    <div class="top-bar"><h1>Client Briefs</h1></div>
-    <div class="cards" id="briefs-grid"></div>
   </div>
 
   <!-- MEETING BRIEFS -->
@@ -285,8 +288,9 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
-  document.querySelectorAll('.nav-item')[['customers','assignments','projects','todos','briefs','meetings'].indexOf(tab)].classList.add('active');
+  document.querySelectorAll('.nav-item')[['customers','calendar','assignments','projects','todos','meetings'].indexOf(tab)].classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
+  if (tab === 'calendar') renderCalendar();
   if (tab === 'meetings') loadMeetings();
 }
 
