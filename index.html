@@ -280,9 +280,10 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
-  document.querySelectorAll('.nav-item')[['customers','calendar','assignments','projects','todos','briefs'].indexOf(tab)].classList.add('active');
+  document.querySelectorAll('.nav-item')[['customers','calendar','assignments','projects','todos','briefs','meetings'].indexOf(tab)].classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
   if (tab === 'calendar') renderCalendar();
+  if (tab === 'meetings') loadMeetings();
 }
 
 function renderAll() {
@@ -452,15 +453,102 @@ function updateTodoPriority(id,v) { DATA.todos[id].priority = v; saveData(); }
 function updateTodoDue(id,v) { DATA.todos[id].due = v; saveData(); }
 
 // BRIEFS
+const CLIENT_BRIEFS = {
+  'Frank Frausto': {
+    contact: 'WhatsApp: 51393645834353@lid | Timezone: PST',
+    source: 'Unknown — ask client',
+    package: 'Full upgrade (paid via Stripe). Part 2 pending.',
+    meetings: 'Mar 6: Proposal sent → Mar 7: Approved, payment link sent → Mar 8: Scheduled Mon 12AM PST → Mar 9-10: DST scheduling confusion → Mar 11: Confirmed "we\'re good for now"',
+    status: '✅ Paid ✅ Initial project completed 🔲 Part 2 requirements doc needed 🔲 Dashboard vs WhatsApp delivery TBD',
+    nextSteps: 'Send Part 2 requirements doc. Confirm bot output delivery method.',
+    draftReply: 'Hey Frank, hope you\'re doing well! Just following up — we\'re putting together the Part 2 requirements doc. Should have it over to you shortly.'
+  },
+  'Andy Watkins': {
+    contact: 'Andy Watkins, JD | WhatsApp: 134376725733441@lid | Timezone: EST',
+    source: 'Google Search — "I think I just googled"',
+    package: 'Onboarding done. Post-call payment link sent.',
+    meetings: 'Mar 5: Initial payment + scheduled call → Mar 6: Confirmed 9AM EST → Mar 7: Call completed, additional payment link sent',
+    status: '✅ Initial payment ✅ Onboarding call completed 🔲 Additional payment confirmation pending',
+    nextSteps: 'Confirm additional payment. Begin setup/delivery.',
+    draftReply: 'Hey Andy, just checking in — were you able to complete the additional payment? Once that\'s sorted, we\'ll get everything rolling for you right away.'
+  },
+  'William Tan': {
+    contact: 'WhatsApp: 230755808591927@lid | Timezone: GMT+8 | Business: Digital Marketing Agency',
+    source: 'Unknown — ask client',
+    package: '$2,000 custom Done-For-You. Full SOP documentation promised.',
+    meetings: 'Feb 23: Initial inquiry + Zoom scheduled → Feb 24: Zoom call, payment confirmed → Mar 12: Follow-up about dedicated WhatsApp line for AI agent',
+    status: '✅ Paid $2,000 ✅ Onboarding call done 🔲 Agent creation in progress 🔲 SOP documentation needed',
+    nextSteps: 'Complete agent creation. Deliver SOP docs. Set up dedicated WhatsApp line.',
+    draftReply: 'Hey William, quick update — we\'re making good progress on your agents. Will keep you posted as we get closer to completion.'
+  },
+  'Charles Dumont': {
+    contact: 'WhatsApp: 114795986575470@lid | Timezone: EST-ish | Client Type: Intermediary for construction company',
+    source: 'Unknown — ask client',
+    package: '3 agents scoped. Pricing approved by Charles. Awaiting customer confirmation.',
+    meetings: 'Mar 4: Scheduling → Mar 5: Call held, follow-up scheduled → Mar 6: Scope doc sent, 3 agents quoted, Charles approved. Mon 8PM HKT call scheduled.',
+    status: '✅ Scope reviewed ✅ Multiple calls completed 🔲 Awaiting customer confirmation 🔲 Payment not yet confirmed',
+    nextSteps: 'Follow up on customer confirmation. Get payment once confirmed.',
+    draftReply: 'Hey Charles, just checking in — any update from your customer on the confirmation? Happy to answer any questions they might have.'
+  },
+  'Marshall': {
+    contact: 'WhatsApp: 218961828417766@lid | Timezone: PST | Found via Reddit (r/AI_Agents)',
+    source: 'Reddit — shared OpenClaw security post from r/AI_Agents',
+    package: 'Pro $399. Paid via Bitcoin.',
+    meetings: 'Mar 10: Bitcoin payment confirmed, call postponed → Mar 11: Rescheduled to Thursday → Mar 13: Confirmed call Mar 14 at 10PM HKT',
+    status: '✅ Paid (Bitcoin) 🔲 Onboarding call Mar 14 10PM HKT ⚠️ Raised security concerns (addressed)',
+    nextSteps: 'Complete onboarding call Mar 14. Address any remaining security questions.',
+    draftReply: 'Hey Marshall, just confirming our call tomorrow at 10PM HKT. Looking forward to it!'
+  },
+  'Dustin': {
+    contact: 'Dustin Hanco | WhatsApp: 19417664639057@lid | Group: Dustin Group | Timezone: EST | Platform: RingCentral/Zoom',
+    source: 'Unknown — ask client',
+    package: 'Paid. Multiple setup sessions completed.',
+    meetings: 'Mar 6: Scheduled, payment sent → Mar 8: Call moved 30min → Mar 10: Setup call (Ashan), OpenAI credits needed → Mar 11: Follow-up → Mar 12: AnyDesk call, Google doc shared',
+    status: '✅ Paid ✅ Multiple calls done ✅ AnyDesk connected 🔲 OpenAI credits needed ⚠️ Feedback: use copy/paste instructions',
+    nextSteps: 'Dustin needs OpenAI credits. Continue setup via AnyDesk.',
+    draftReply: 'Hey Dustin, ready for our next session! What time works for you? We\'ll pick up right where we left off.'
+  },
+  'Dean Cooper': {
+    contact: 'WhatsApp: 85260199166 | Location: HK, Level 13, 32 Hollywood Rd, Kinwick Centre | Runs Brawn and Manoa (fitness/tennis, HK+Tokyo)',
+    source: 'Personal contact — Ty pitched directly',
+    package: 'TBD — likely Starter or Pro. In-person setup done. Possibly personal favor/demo.',
+    meetings: 'Feb 17: Interested → Feb 27: Met at office, set up OpenClaw → Mar 3: Follow-up at office → Mar 4: Rescheduled (ITF match) → Mar 8: Suggested 16th → Confirmed',
+    status: '✅ OpenClaw installed 🔲 Follow-up Mar 16 🔲 Payment not discussed 🔲 Security concerns raised Mar 3',
+    nextSteps: 'Confirm time for Mar 16. Determine if paid or demo. Address security concerns.',
+    draftReply: 'Hey Dean! Just confirming we\'re still on for the 16th 🙌 Same place at your office? What time works best?'
+  },
+  'THF (William Agency)': {
+    contact: 'William Tan | WhatsApp: 230755808591927@lid | Group: William Agency Project Group | Possibly MY/SG',
+    source: 'Direct client — William Tan, digital marketing agency',
+    package: '$2,000 custom Done-For-You. Full 6-agent AI marketing team.',
+    meetings: 'Mar 9: Nouman 1h40m setup via Tailscale → Mar 10: Nouman 1h30m gateway/API config → Mar 11: Nouman 4h20m built all 6 agents + Supabase DB',
+    status: '✅ Paid $2,000 ✅ 6 agents built ✅ Supabase DB set up ✅ SSH/remote access established 🔲 Live ad platform connections 🔲 GoHighLevel/Monday.com integration',
+    nextSteps: 'Connect agents to Meta/Google/TikTok Ads. Test lead capture pipeline. Deliver GoHighLevel integration.',
+    draftReply: 'Hey William, good news — all 6 agents are built and the database is set up. Next step is connecting to your ad platforms. When\'s a good time to sync?'
+  }
+};
+
 function renderBriefs() {
   const grid = document.getElementById('briefs-grid');
-  grid.innerHTML = Object.values(DATA.customers||{}).map(c => `
-    <div class="card" style="text-align:center">
-      <h3>${esc(c.name)}</h3>
-      <p style="color:var(--text-muted);margin:10px 0;font-size:.85rem">${esc(c.package)}</p>
-      <a href="${esc(c.drive)}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-folder-open"></i> View Brief</a>
-    </div>
-  `).join('');
+  grid.innerHTML = Object.entries(DATA.customers||{}).map(([id, c]) => {
+    const brief = CLIENT_BRIEFS[c.name] || null;
+    if (!brief) return `<div class="card"><h3>${esc(c.name)}</h3><p style="color:var(--text-muted)">No brief available</p></div>`;
+    return `<div class="card" style="max-width:100%">
+      <h3 style="margin-bottom:15px">${esc(c.name)}</h3>
+      <div style="font-size:.83rem;line-height:1.7">
+        <div style="margin-bottom:10px"><span style="color:var(--primary);font-weight:600">📇 Contact:</span> ${esc(brief.contact)}</div>
+        <div style="margin-bottom:10px"><span style="color:var(--primary);font-weight:600">🔍 Source:</span> ${esc(brief.source)}</div>
+        <div style="margin-bottom:10px"><span style="color:var(--primary);font-weight:600">📦 Package:</span> ${esc(brief.package)}</div>
+        <div style="margin-bottom:10px"><span style="color:var(--primary);font-weight:600">📅 Meetings:</span> ${esc(brief.meetings)}</div>
+        <div style="margin-bottom:10px"><span style="color:var(--primary);font-weight:600">📊 Status:</span> ${esc(brief.status)}</div>
+        <div style="margin-bottom:10px"><span style="color:var(--primary);font-weight:600">➡️ Next Steps:</span> ${esc(brief.nextSteps)}</div>
+        <div style="margin-bottom:10px;padding:10px;background:var(--bg);border-radius:8px;border-left:3px solid var(--primary)">
+          <span style="color:var(--primary);font-weight:600">💬 Draft Reply:</span><br><span style="color:var(--text-muted);font-style:italic">${esc(brief.draftReply)}</span>
+        </div>
+      </div>
+      <div style="margin-top:12px"><a href="${esc(c.drive)}" target="_blank" class="btn btn-outline btn-sm"><i class="fas fa-folder-open"></i> Google Drive Folder</a></div>
+    </div>`;
+  }).join('');
 }
 
 // MODALS
@@ -577,6 +665,87 @@ function deleteItem(collection, id) {
 }
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+
+// MEETING BRIEFS (Fireflies.ai)
+const FIREFLIES_KEY = '26c44944-a858-4cec-89ed-52a87b0101e7';
+const FIREFLIES_URL = 'https://api.fireflies.ai/graphql';
+let meetingsData = [];
+
+function loadMeetings() {
+  const cached = db.ref('meetingBriefs');
+  cached.once('value').then(snap => {
+    const val = snap.val();
+    if (val && val.transcripts && val.transcripts.length) {
+      meetingsData = val.transcripts;
+      renderMeetings();
+      document.getElementById('meetings-status').textContent = 'Cached · Last fetched: ' + (val.fetchedAt ? new Date(val.fetchedAt).toLocaleString() : 'unknown');
+    } else {
+      fetchFirefliesMeetings();
+    }
+  }).catch(() => fetchFirefliesMeetings());
+}
+
+async function fetchFirefliesMeetings() {
+  const status = document.getElementById('meetings-status');
+  const grid = document.getElementById('meetings-grid');
+  status.innerHTML = '<span class="spinner"></span> Fetching from Fireflies...';
+  grid.innerHTML = '';
+
+  try {
+    const res = await fetch(FIREFLIES_URL, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + FIREFLIES_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: `{ transcripts { id title date duration summary { overview shorthand_bullet action_items } participants } }` })
+    });
+    const json = await res.json();
+    if (json.errors) throw new Error(json.errors[0].message);
+    meetingsData = (json.data.transcripts || []).sort((a,b) => {
+      const da = a.date ? new Date(Number(a.date) > 1e12 ? Number(a.date) : a.date) : 0;
+      const db2 = b.date ? new Date(Number(b.date) > 1e12 ? Number(b.date) : b.date) : 0;
+      return db2 - da;
+    });
+    // Cache to Firebase
+    db.ref('meetingBriefs').set({ transcripts: meetingsData, fetchedAt: Date.now() });
+    renderMeetings();
+    status.textContent = `${meetingsData.length} meetings · Updated just now`;
+  } catch (err) {
+    status.textContent = 'Error: ' + err.message;
+    console.error('Fireflies error:', err);
+    // Try cached
+    const local = localStorage.getItem('oc-meetings');
+    if (local) { meetingsData = JSON.parse(local); renderMeetings(); }
+  }
+}
+
+function renderMeetings() {
+  localStorage.setItem('oc-meetings', JSON.stringify(meetingsData));
+  const grid = document.getElementById('meetings-grid');
+  if (!meetingsData.length) { grid.innerHTML = '<p style="color:var(--text-muted)">No meetings found.</p>'; return; }
+
+  grid.innerHTML = meetingsData.map((m, i) => {
+    const date = m.date ? new Date(Number(m.date) > 1e12 ? Number(m.date) : m.date) : null;
+    const dateStr = date ? date.toLocaleDateString('en-US', {weekday:'short',year:'numeric',month:'short',day:'numeric'}) : 'Unknown date';
+    const dur = m.duration ? Math.round(m.duration / 60) + ' min' : 'N/A';
+    const participants = (m.participants || []);
+    const summary = m.summary || {};
+    const bullets = summary.shorthand_bullet ? summary.shorthand_bullet.split('\n').filter(Boolean) : [];
+    const actions = summary.action_items ? summary.action_items.split('\n').filter(Boolean) : [];
+
+    return `<div class="card">
+      <h3><i class="fas fa-video" style="margin-right:6px"></i>${esc(m.title || 'Untitled Meeting')}</h3>
+      <div class="card-row"><span class="label">Date</span><span class="value">${esc(dateStr)}</span></div>
+      <div class="card-row"><span class="label">Duration</span><span class="value">${esc(dur)}</span></div>
+      ${participants.length ? `<div style="margin-top:4px;font-size:.8rem;color:var(--text-muted)">Participants</div><div class="meeting-participants">${participants.map(p=>'<span>'+esc(p)+'</span>').join('')}</div>` : ''}
+      <button class="meeting-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.textContent=this.nextElementSibling.classList.contains('open')?'▲ Hide details':'▼ Show details'">▼ Show details</button>
+      <div class="meeting-expand">
+        ${summary.overview ? `<h4>Overview</h4><p>${esc(summary.overview)}</p>` : ''}
+        ${bullets.length ? `<h4>Key Points</h4><ul>${bullets.map(b=>'<li>'+esc(b)+'</li>').join('')}</ul>` : ''}
+        ${actions.length ? `<h4>Action Items</h4><ul>${actions.map(a=>'<li>'+esc(a)+'</li>').join('')}</ul>` : ''}
+        ${!summary.overview && !bullets.length && !actions.length ? '<p>No summary available.</p>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
