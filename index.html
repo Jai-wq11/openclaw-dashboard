@@ -222,10 +222,24 @@ const DEFAULT_DATA = {
     c8:{name:'THF (William Agency)',package:'$2000 custom',status:'6 agents built',employee:'Nouman',drive:'https://drive.google.com/drive/folders/1eGDzFor4VJci3TTEpH8YfiYtCzOOLOYr',notes:''}
   },
   events: {
-    e1:{date:'2026-03-14',time:'13:00',title:'Marshall - Setup Call',client:'Marshall'},
-    e2:{date:'2026-03-16',time:'17:00',title:'Dean Cooper - Setup Follow-up',client:'Dean Cooper'}
+    e1:{date:'2026-03-14',time:'13:00',title:'Marshall - Setup Call (10PM PST)',client:'Marshall'},
+    e2:{date:'2026-03-16',time:'17:00',title:'Dean Cooper - Setup Follow-up',client:'Dean Cooper'},
+    e3:{date:'2026-03-10',time:'16:00',title:'Frank - Setup Call (held)',client:'Frank Frausto'},
+    e4:{date:'2026-03-07',time:'22:00',title:'Andy - Onboarding Call (held)',client:'Andy Watkins'},
+    e5:{date:'2026-02-24',time:'16:00',title:'William - Zoom Call (held)',client:'William Tan'},
+    e6:{date:'2026-03-05',time:'21:00',title:'Charles - Discovery Call (held)',client:'Charles Dumont'},
+    e7:{date:'2026-03-06',time:'20:00',title:'Charles - Follow-up Call (held)',client:'Charles Dumont'},
+    e8:{date:'2026-03-10',time:'21:00',title:'Dustin - Setup Call via RingCentral (held)',client:'Dustin'},
+    e9:{date:'2026-03-12',time:'20:30',title:'Dustin - AnyDesk Call via RingCentral (held)',client:'Dustin'}
   },
-  projects: {},
+  projects: {
+    p1:{name:'Frank Frausto - Part 2 Build',client:'Frank Frausto',step:'Waiting on Part 2 requirements doc to send to Frank',status:'In Progress',notes:'Part 1 complete. Need to confirm bot output delivery (Dashboard vs WhatsApp). Send requirements doc.'},
+    p2:{name:'William Tan - Agent Setup',client:'William Tan',step:'Agents being built, dedicated WhatsApp line next',status:'In Progress',notes:'$2,000 paid. SOP documentation promised. Follow-up sent Mar 12 about WhatsApp line.'},
+    p3:{name:'THF - 6-Agent Marketing Team',client:'THF (William Agency)',step:'Connect agents to live ad platforms (Meta, Google, TikTok)',status:'In Progress',notes:'6 agents built by Nouman (7h30m). Supabase DB set up. SSH access established. Next: GoHighLevel/Monday.com integration + live ad platform connections.'},
+    p4:{name:'Charles Dumont - 3 Agent Build',client:'Charles Dumont',step:'Awaiting customer confirmation before starting build',status:'Blocked',notes:'3 agents scoped and priced. Charles approved. Waiting on his construction company customer to confirm. Payment not yet received.'},
+    p5:{name:'Marshall - Pro Setup',client:'Marshall',step:'Onboarding call scheduled Mar 14 10PM HKT',status:'Not Started',notes:'Paid via Bitcoin. Security concerns addressed. Call confirmed for Mar 14.'},
+    p6:{name:'Dustin - OpenClaw Setup',client:'Dustin',step:'Continue setup via AnyDesk, Dustin needs OpenAI credits',status:'In Progress',notes:'Multiple calls done (Ahshan assigned). AnyDesk connected. Dustin needs to set up OpenAI credits. Feedback: use copy/paste instructions.'}
+  },
   todos: {
     t1:{text:'Build proposal + superman stuff for THF group',done:false,priority:'high',due:''},
     t2:{text:'Create a security risks video for OpenClaw',done:false,priority:'high',due:''},
