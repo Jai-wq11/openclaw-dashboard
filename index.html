@@ -1,855 +1,582 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClaw Business Dashboard</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; overflow-x: hidden; }
-        .container { display: flex; min-height: 100vh; }
-
-        .sidebar { width: 250px; background: #16213e; padding: 2rem 1rem; border-right: 1px solid #0f3460; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-        .logo { font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; color: #e94560; }
-        .nav-item { padding: 0.75rem 1rem; margin: 0.5rem 0; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.75rem; }
-        .nav-item:hover { background: #0f3460; }
-        .nav-item.active { background: #0f3460; color: #e94560; }
-        .sidebar-divider { border-top: 1px solid #0f3460; margin: 1.5rem 0; }
-
-        .main-content { flex: 1; padding: 2rem; max-width: 1400px; }
-        .view { display: none; }
-        .view.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        h1 { margin-bottom: 2rem; font-size: 2rem; }
-
-        .stat-card { background: #16213e; padding: 1.5rem; border-radius: 12px; border: 1px solid #0f3460; }
-        .stat-label { color: #888; font-size: 0.875rem; margin-bottom: 0.5rem; }
-        .stat-value { font-size: 2rem; font-weight: 700; color: #e94560; }
-
-        .table-controls { display: flex; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
-        .search-bar { flex: 1; max-width: 400px; padding: 0.75rem; background: #16213e; border: 1px solid #0f3460; border-radius: 8px; color: #e0e0e0; font-size: 1rem; }
-        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s; font-weight: 500; }
-        .btn-primary { background: #e94560; color: white; }
-        .btn-primary:hover { background: #d63851; }
-        .btn-secondary { background: #0f3460; color: #e0e0e0; }
-        .btn-secondary:hover { background: #1a4d7a; }
-        .btn-danger { background: #c92a3e; color: white; }
-        .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
-        .status-badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-
-        table { width: 100%; border-collapse: collapse; background: #16213e; border-radius: 12px; overflow: hidden; }
-        th { background: #0f3460; padding: 1rem; text-align: left; font-weight: 600; cursor: pointer; user-select: none; }
-        th:hover { background: #1a4d7a; }
-        td { padding: 1rem; border-top: 1px solid #0f3460; }
-        tr:hover { background: #1a2844; }
-
-        input[type="text"], input[type="number"], input[type="date"], input[type="datetime-local"], input[type="url"], select, textarea {
-            width: 100%; padding: 0.5rem; background: #1a1a2e; border: 1px solid #0f3460; border-radius: 6px; color: #e0e0e0; font-size: 0.875rem;
-        }
-        input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
-        textarea { min-height: 60px; resize: vertical; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
-        .modal.active { display: flex; animation: fadeIn 0.2s; }
-        .modal-content { background: #16213e; padding: 2rem; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid #0f3460; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .modal-header h2 { font-size: 1.5rem; }
-        .close-btn, .close-modal { background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer; padding: 0; }
-        .close-btn:hover, .close-modal:hover { color: #e94560; }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; color: #888; font-size: 0.875rem; }
-        .form-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; }
-
-        .toast { position: fixed; bottom: 2rem; right: 2rem; background: #16213e; padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid #0f3460; z-index: 2000; animation: slideIn 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .toast.success { border-left: 4px solid #4caf50; }
-        .toast.error { border-left: 4px solid #e94560; }
-
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .calendar-nav { display: flex; gap: 1rem; align-items: center; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #0f3460; border: 1px solid #0f3460; border-radius: 12px; overflow: hidden; }
-        .calendar-day-header { background: #0f3460; padding: 1rem; text-align: center; font-weight: 600; }
-        .calendar-day { background: #16213e; padding: 0.75rem; min-height: 100px; cursor: pointer; transition: background 0.2s; }
-        .calendar-day:hover { background: #1a2844; }
-        .calendar-day.other-month { opacity: 0.3; }
-        .calendar-day-number { font-weight: 600; margin-bottom: 0.5rem; }
-        .calendar-event { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; margin: 0.25rem 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .calendar-event.customer { background: #2196f3; }
-        .calendar-event.todo { background: #ff9800; }
-        .legend { display: flex; gap: 2rem; margin-bottom: 2rem; }
-        .legend-item { display: flex; align-items: center; gap: 0.5rem; }
-        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
-
-        input[type="file"] { display: none; }
-
-        .folder-card { background: #16213e; border: 1px solid #0f3460; border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.2s; text-align: center; }
-        .folder-card:hover { background: #1a2844; border-color: #e94560; transform: translateY(-2px); }
-        .folder-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .folder-name { font-weight: 600; font-size: 1rem; }
-        .folder-meta { color: #888; font-size: 0.8rem; margin-top: 0.25rem; }
-        .note-card { background: #1a2844; border: 1px solid #0f3460; border-radius: 8px; padding: 1rem; }
-        .note-card .note-time { color: #888; font-size: 0.75rem; margin-bottom: 0.5rem; }
-        .note-card .note-text { font-size: 0.9rem; white-space: pre-wrap; }
-        .drag-card { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 0.75rem 1rem; cursor: grab; transition: all 0.2s; }
-        .drag-card:hover { background: #1a2844; border-color: #e94560; }
-        .drag-card:active { cursor: grabbing; }
-        .drop-zone { min-height: 80px; border: 2px dashed #0f3460; border-radius: 8px; padding: 0.75rem; transition: all 0.2s; }
-        .drop-zone.drag-over { border-color: #e94560; background: rgba(233,69,96,0.1); }
-        .employee-section { background: #16213e; border: 1px solid #0f3460; border-radius: 12px; padding: 1rem; }
-        .employee-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-        .employee-remove { color: #888; font-size: 0.8rem; cursor: pointer; }
-        .employee-remove:hover { color: #e94560; }
-        .assigned-card { background: #1a2844; border: 1px solid #0f3460; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: flex-start; }
-        .remove-btn { cursor: pointer; font-size: 0.9rem; }
-        @media (max-width: 768px) {
-            .sidebar { width: 80px; padding: 1rem 0.5rem; }
-            .nav-item span:not(.nav-icon) { display: none; }
-            .logo { font-size: 1rem; }
-            .main-content { padding: 1rem; }
-            .table-controls { flex-direction: column; }
-            .search-bar { max-width: 100%; }
-            table { font-size: 0.875rem; }
-            th, td { padding: 0.5rem; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f1117;--sidebar:#161822;--card:#1c1e2e;--card-hover:#242640;--border:#2a2d3e;--primary:#6c5ce7;--primary-hover:#7c6ff7;--text:#e8e8f0;--text-muted:#8888a0;--success:#00b894;--warning:#fdcb6e;--danger:#e17055;--info:#74b9ff}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;overflow-x:hidden}
+.sidebar{width:220px;background:var(--sidebar);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;transition:transform .3s}
+.sidebar .logo{padding:0 20px 30px;font-size:1.4rem;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:10px}
+.sidebar .logo i{font-size:1.6rem}
+.nav-item{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:12px;color:var(--text-muted);transition:all .2s;border-left:3px solid transparent;font-size:.9rem}
+.nav-item:hover,.nav-item.active{background:rgba(108,92,231,.1);color:var(--text);border-left-color:var(--primary)}
+.nav-item i{width:20px;text-align:center}
+.main{margin-left:220px;flex:1;padding:30px;width:calc(100% - 220px)}
+.tab-content{display:none;animation:fadeIn .3s}
+.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:1.8rem;margin-bottom:20px;font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;transition:all .2s}
+.card:hover{background:var(--card-hover);transform:translateY(-2px)}
+.card h3{font-size:1.1rem;margin-bottom:12px;color:var(--primary)}
+.card-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:.85rem}
+.card-row .label{color:var(--text-muted)}
+.card-row .value{font-weight:500}
+.badge{padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:500}
+.badge-success{background:rgba(0,184,148,.15);color:var(--success)}
+.badge-warning{background:rgba(253,203,110,.15);color:var(--warning)}
+.badge-info{background:rgba(116,185,255,.15);color:var(--info)}
+.badge-danger{background:rgba(225,112,85,.15);color:var(--danger)}
+.btn{padding:8px 16px;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:500;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-sm{padding:5px 12px;font-size:.8rem}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+a.drive-link{color:var(--info);text-decoration:none;font-size:.85rem}
+a.drive-link:hover{text-decoration:underline}
+input,select,textarea{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:.85rem;font-family:inherit;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary)}
+textarea{resize:vertical;min-height:60px}
+.notes-field{margin-top:10px}
+.notes-field textarea{width:100%;margin-top:4px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:200}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px;width:90%;max-width:500px}
+.modal h2{margin-bottom:20px;font-size:1.3rem}
+.form-group{margin-bottom:15px}
+.form-group label{display:block;margin-bottom:5px;font-size:.85rem;color:var(--text-muted)}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:15px}
+.cal-header{padding:8px;text-align:center;font-size:.8rem;color:var(--text-muted);font-weight:600}
+.cal-day{background:var(--card);border:1px solid var(--border);padding:8px;min-height:80px;border-radius:6px;font-size:.8rem;cursor:pointer;transition:background .2s}
+.cal-day:hover{background:var(--card-hover)}
+.cal-day .day-num{font-weight:600;margin-bottom:4px}
+.cal-day.other-month{opacity:.3}
+.cal-day.today{border-color:var(--primary)}
+.cal-event{background:rgba(108,92,231,.2);color:var(--primary);padding:2px 4px;border-radius:3px;margin-bottom:2px;font-size:.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-nav{display:flex;align-items:center;gap:15px;margin-bottom:10px}
+.cal-nav h2{font-size:1.2rem;min-width:200px}
+.assignment-table{width:100%;border-collapse:collapse;margin-top:15px}
+.assignment-table th,.assignment-table td{padding:12px 15px;text-align:left;border-bottom:1px solid var(--border);font-size:.85rem}
+.assignment-table th{color:var(--text-muted);font-weight:600;font-size:.8rem;text-transform:uppercase}
+.assignment-table tr:hover td{background:rgba(108,92,231,.05)}
+.employee-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:15px}
+.employee-card h3{color:var(--primary);margin-bottom:8px}
+.todo-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:all .2s}
+.todo-item:hover{background:var(--card-hover)}
+.todo-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--primary);cursor:pointer;flex-shrink:0}
+.todo-item.done .todo-text{text-decoration:line-through;opacity:.5}
+.todo-text{flex:1;font-size:.9rem}
+.todo-meta{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.priority-high{color:var(--danger)}
+.priority-medium{color:var(--warning)}
+.priority-low{color:var(--success)}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.5rem;cursor:pointer}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.status-dot.green{background:var(--success)}
+.status-dot.yellow{background:var(--warning)}
+.status-dot.red{background:var(--danger)}
+.sync-status{position:fixed;bottom:20px;right:20px;padding:8px 16px;border-radius:20px;font-size:.8rem;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;gap:8px;z-index:50}
+@media(max-width:768px){
+.sidebar{transform:translateX(-100%)}
+.sidebar.open{transform:translateX(0)}
+.main{margin-left:0;width:100%;padding:15px}
+.hamburger{display:block}
+.cards{grid-template-columns:1fr}
+.calendar-grid{font-size:.7rem}
+.cal-day{min-height:50px;padding:4px}
+.meeting-expand{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.meeting-expand.open{display:block}
+.meeting-expand h4{font-size:.85rem;color:var(--primary);margin:10px 0 5px}
+.meeting-expand ul{padding-left:18px;font-size:.82rem;line-height:1.6}
+.meeting-expand p{font-size:.82rem;line-height:1.5;color:var(--text-muted)}
+.meeting-toggle{background:none;border:none;color:var(--info);cursor:pointer;font-size:.82rem;margin-top:8px;padding:0}
+.meeting-toggle:hover{text-decoration:underline}
+.meeting-participants{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.meeting-participants span{background:rgba(108,92,231,.15);color:var(--primary);padding:2px 8px;border-radius:12px;font-size:.75rem}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <div class="logo">🦅 OpenClaw</div>
-            <div class="nav-item active" data-view="customers">
-                <span class="nav-icon">👥</span>
-                <span>Customers</span>
-            </div>
-            <div class="nav-item" data-view="calendar">
-                <span class="nav-icon">📅</span>
-                <span>Calendar</span>
-            </div>
-            <div class="nav-item" data-view="todos">
-                <span class="nav-icon">✅</span>
-                <span>To-Do List</span>
-            </div>
-            <div class="nav-item" data-view="assignments">
-                <span class="nav-icon">🔗</span>
-                <span>Assignments</span>
-            </div>
-            <div class="nav-item" data-view="folders">
-                <span class="nav-icon">📁</span>
-                <span>Client Folders</span>
-            </div>
-            <div class="sidebar-divider"></div>
-            <div class="nav-item" onclick="exportAllData()">
-                <span class="nav-icon">📤</span>
-                <span>Export Data</span>
-            </div>
-            <div class="nav-item" onclick="document.getElementById('import-file-input').click()">
-                <span class="nav-icon">📥</span>
-                <span>Import Data</span>
-            </div>
-        </div>
 
-        <div class="main-content">
-            <!-- Customers View -->
-            <div class="view active" id="customers">
-                <h1>Customers</h1>
-                <div class="table-controls">
-                    <input type="text" class="search-bar" id="customer-search" placeholder="Search customers...">
-                    <div style="display: flex; gap: 1rem;">
-                        <button class="btn btn-secondary btn-sm" onclick="exportCustomersCSV()">📥 Export CSV</button>
-                        <button class="btn btn-primary" onclick="showAddCustomer()">+ Add Customer</button>
-                    </div>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th onclick="sortTable('customers', 'name')">Name</th>
-                                <th onclick="sortTable('customers', 'callDate')">Time</th>
-                                <th>Notes</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customers-tbody"></tbody>
-                    </table>
-                </div>
-            </div>
+<nav class="sidebar" id="sidebar">
+  <div class="logo"><i class="fas fa-bolt"></i> OpenClaw</div>
+  <div class="nav-item active" onclick="switchTab('customers')"><i class="fas fa-users"></i> Customers</div>
+  <div class="nav-item" onclick="switchTab('calendar')"><i class="fas fa-calendar-alt"></i> Calendar</div>
+  <div class="nav-item" onclick="switchTab('assignments')"><i class="fas fa-user-tag"></i> Assignments</div>
+  <div class="nav-item" onclick="switchTab('projects')"><i class="fas fa-project-diagram"></i> Projects</div>
+  <div class="nav-item" onclick="switchTab('todos')"><i class="fas fa-check-square"></i> To-Do List</div>
+  <div class="nav-item" onclick="switchTab('briefs')"><i class="fas fa-folder-open"></i> Client Briefs</div>
+  <div class="nav-item" onclick="switchTab('meetings')"><i class="fas fa-microphone-alt"></i> Meeting Briefs</div>
+</nav>
 
-            <!-- Calendar View -->
-            <div class="view" id="calendar">
-                <h1>Calendar</h1>
-                <p style="color:#e94560;font-size:0.9rem;margin-bottom:10px;">⏰ All times shown in Hong Kong Time (HKT / GMT+8)</p>
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #2196f3;"></div>
-                        <span>Customers</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #ff9800;"></div>
-                        <span>To-Do Due Dates</span>
-                    </div>
-                </div>
-                <div class="calendar-header">
-                    <h2 id="calendar-month-year"></h2>
-                    <div class="calendar-nav">
-                        <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">← Prev</button>
-                        <button class="btn btn-secondary btn-sm" onclick="goToToday()">Today</button>
-                        <button class="btn btn-secondary btn-sm" onclick="changeMonth(1)">Next →</button>
-                    </div>
-                </div>
-                <div class="calendar-grid" id="calendar-grid"></div>
-            </div>
+<main class="main">
+  <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
 
-            <!-- To-Do List View -->
-            <div class="view" id="todos">
-                <h1>To-Do List</h1>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                    <div style="display:flex;gap:10px;">
-                        <select id="todo-filter-urgency" onchange="renderTodos()" style="padding:8px;border-radius:6px;background:#16213e;color:white;border:1px solid #0f3460;">
-                            <option value="">All Urgency</option>
-                            <option value="🔴 Critical">🔴 Critical</option>
-                            <option value="🟡 High">🟡 High</option>
-                            <option value="🔵 Medium">🔵 Medium</option>
-                            <option value="⚪ Low">⚪ Low</option>
-                        </select>
-                        <select id="todo-filter-assignee" onchange="renderTodos()" style="padding:8px;border-radius:6px;background:#16213e;color:white;border:1px solid #0f3460;">
-                            <option value="">All Assignees</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary" onclick="showAddTodo()">+ Add Task</button>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Done</th>
-                            <th onclick="sortTable('todos', 'urgency')">Urgency</th>
-                            <th onclick="sortTable('todos', 'task')">Task</th>
-                            <th onclick="sortTable('todos', 'assignee')">Assigned To</th>
-                            <th onclick="sortTable('todos', 'dueDate')">Due Date</th>
-                            <th onclick="sortTable('todos', 'status')">Status</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="todos-tbody"></tbody>
-                </table>
-            </div>
+  <!-- CUSTOMERS -->
+  <div class="tab-content active" id="tab-customers">
+    <div class="top-bar"><h1>Customers</h1><button class="btn btn-primary" onclick="showModal('customer')"><i class="fas fa-plus"></i> Add Customer</button></div>
+    <div class="cards" id="customers-grid"></div>
+  </div>
 
-            <!-- Assignments View -->
-            <div class="view" id="assignments">
-                <h1>🔗 Assignments</h1>
-                <div style="display:flex;gap:1rem;margin-bottom:1.5rem;align-items:center;">
-                    <button class="btn btn-primary btn-sm" onclick="addAssignmentEmployee()">+ Add Employee</button>
-                    <span style="color:#888;font-size:0.875rem;">Drag a customer onto an employee to assign them</span>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 2fr;gap:2rem;min-height:400px;">
-                    <!-- Unassigned Customers -->
-                    <div>
-                        <h2 style="font-size:1.2rem;margin-bottom:1rem;color:#e94560;">📋 Unassigned Customers</h2>
-                        <div id="unassigned-customers" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
-                    </div>
-                    <!-- Employee Drop Zones -->
-                    <div>
-                        <h2 style="font-size:1.2rem;margin-bottom:1rem;color:#e94560;">👥 Employees</h2>
-                        <div id="employees-drop-zones" style="display:flex;flex-direction:column;gap:1.5rem;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Client Folders View -->
-            <div class="view" id="folders">
-                <h1>📁 Client Folders</h1>
-                <p style="color:#888;margin-bottom:1.5rem;">Each customer gets a folder. Click to open and add internal notes.</p>
-                <div id="folders-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;"></div>
-            </div>
-
-            <!-- Folder Detail (shown when a folder is opened) -->
-            <div class="view" id="folder-detail">
-                <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
-                    <button class="btn btn-secondary btn-sm" onclick="closeFolderDetail()">← Back</button>
-                    <h1 id="folder-detail-name" style="margin-bottom:0;"></h1>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
-                    <div class="stat-card"><div class="stat-label">Call Time</div><div id="folder-detail-time" style="font-size:1.1rem;"></div></div>
-                    <div class="stat-card"><div class="stat-label">Customer Notes</div><div id="folder-detail-customer-notes" style="font-size:0.9rem;color:#aaa;"></div></div>
-                </div>
-                <h2 style="font-size:1.2rem;margin-bottom:1rem;">📝 Internal Notes</h2>
-                <div style="display:flex;gap:1rem;margin-bottom:1rem;">
-                    <textarea id="folder-new-note" rows="3" placeholder="Add an internal note..." style="flex:1;"></textarea>
-                    <button class="btn btn-primary" onclick="addFolderNote()" style="align-self:flex-end;">Add Note</button>
-                </div>
-                <div id="folder-notes-list" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
-            </div>
-        </div>
+  <!-- CALENDAR -->
+  <div class="tab-content" id="tab-calendar">
+    <div class="top-bar"><h1>Calendar</h1><button class="btn btn-primary" onclick="showModal('event')"><i class="fas fa-plus"></i> Add Event</button></div>
+    <div class="cal-nav">
+      <button class="btn btn-outline btn-sm" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+      <h2 id="cal-month-label"></h2>
+      <button class="btn btn-outline btn-sm" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
     </div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+  </div>
 
-    <!-- Customer Modal -->
-    <div class="modal" id="customer-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="customer-modal-title">Add Customer</h2>
-                <button class="close-btn" onclick="closeModal('customer-modal')">×</button>
-            </div>
-            <form id="customer-form">
-                <input type="hidden" id="customer-id">
-                <div class="form-group">
-                    <label>Name *</label>
-                    <input type="text" id="customer-name" required>
-                </div>
-                <div class="form-group">
-                    <label>Time (Call Date/Time)</label>
-                    <input type="datetime-local" id="customer-calldate">
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="customer-notes" rows="4"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('customer-modal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
+  <!-- ASSIGNMENTS -->
+  <div class="tab-content" id="tab-assignments">
+    <div class="top-bar"><h1>Assignments</h1></div>
+    <div style="margin-bottom:20px">
+      <a href="https://docs.google.com/spreadsheets/d/13ttu3Nbd-tinH5y0j9xTHU2oX5I3cwFB9M22fjWKR44" target="_blank" class="btn btn-outline btn-sm"><i class="fas fa-external-link-alt"></i> Master Payment Tracker</a>
     </div>
+    <div id="employees-section"></div>
+    <h2 style="margin:25px 0 10px">Client Assignments</h2>
+    <table class="assignment-table">
+      <thead><tr><th>Client</th><th>Assigned To</th><th>Action</th></tr></thead>
+      <tbody id="assignments-tbody"></tbody>
+    </table>
+  </div>
 
-    <!-- Todo Modal -->
-    <div class="modal" id="todo-modal">
-        <div class="modal-content" style="max-width:500px">
-            <div class="modal-header">
-                <h2 id="todo-modal-title">Add Task</h2>
-                <span class="close-modal" onclick="closeModal('todo-modal')">&times;</span>
-            </div>
-            <form id="todo-form" onsubmit="saveTodo(event)">
-                <input type="hidden" id="todo-id">
-                <div class="form-group">
-                    <label>Task</label>
-                    <input type="text" id="todo-task" required placeholder="What needs to be done?">
-                </div>
-                <div class="form-group">
-                    <label>Urgency</label>
-                    <select id="todo-urgency">
-                        <option value="🔴 Critical">🔴 Critical</option>
-                        <option value="🟡 High">🟡 High</option>
-                        <option value="🔵 Medium">🔵 Medium</option>
-                        <option value="⚪ Low">⚪ Low</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Assigned To</label>
-                    <select id="todo-assignee">
-                        <option value="Ty">Ty</option>
-                        <option value="Jaiden">Jaiden</option>
-                        <option value="Unassigned">Unassigned</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Due Date</label>
-                    <input type="date" id="todo-due-date">
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="todo-status">
-                        <option value="To Do">To Do</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Blocked">Blocked</option>
-                        <option value="Done">Done</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="todo-notes" rows="2"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width:100%">Save Task</button>
-            </form>
-        </div>
+  <!-- PROJECTS -->
+  <div class="tab-content" id="tab-projects">
+    <div class="top-bar"><h1>Projects</h1><button class="btn btn-primary" onclick="showModal('project')"><i class="fas fa-plus"></i> Add Project</button></div>
+    <div class="cards" id="projects-grid"></div>
+  </div>
+
+  <!-- TODOS -->
+  <div class="tab-content" id="tab-todos">
+    <div class="top-bar"><h1>To-Do List</h1><button class="btn btn-primary" onclick="showModal('todo')"><i class="fas fa-plus"></i> Add Task</button></div>
+    <div id="todos-list"></div>
+  </div>
+
+  <!-- BRIEFS -->
+  <div class="tab-content" id="tab-briefs">
+    <div class="top-bar"><h1>Client Briefs</h1></div>
+    <div class="cards" id="briefs-grid"></div>
+  </div>
+
+  <!-- MEETING BRIEFS -->
+  <div class="tab-content" id="tab-meetings">
+    <div class="top-bar"><h1>Meeting Briefs</h1>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span id="meetings-status" style="font-size:.8rem;color:var(--text-muted)"></span>
+        <button class="btn btn-primary" onclick="fetchFirefliesMeetings()"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
     </div>
+    <div id="meetings-grid" class="cards"></div>
+  </div>
+</main>
 
-    <!-- Assignment Modal -->
-    <div class="modal" id="assignment-modal">
-        <div class="modal-content" style="max-width:500px">
-            <div class="modal-header">
-                <h2>Assign Customer</h2>
-                <button class="close-btn" onclick="closeModal('assignment-modal')">×</button>
-            </div>
-            <form id="assignment-form">
-                <input type="hidden" id="assign-customer-id">
-                <input type="hidden" id="assign-employee-name">
-                <div class="form-group"><label>Customer</label><input type="text" id="assign-customer-name" readonly></div>
-                <div class="form-group"><label>Employee</label><input type="text" id="assign-employee-display" readonly></div>
-                <div class="form-group"><label>Call Time</label><input type="datetime-local" id="assign-call-time"></div>
-                <div class="form-group"><label>Goals for this call</label><textarea id="assign-goals" rows="4" placeholder="What should be accomplished during this call?"></textarea></div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('assignment-modal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Assign</button>
-                </div>
-            </form>
-        </div>
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<div class="sync-status" id="sync-status"><span class="status-dot green"></span> Synced</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = { databaseURL: "https://openclaw-dashboard-28911-default-rtdb.asia-southeast1.firebasedatabase.app" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const dbRef = db.ref('dashboard');
+
+let DATA = { customers: {}, events: {}, projects: {}, todos: {} };
+let suppressFirebaseWrite = false;
+let calYear = 2026, calMonth = 2; // March 2026
+
+const EMPLOYEES = [
+  { id:'nouman', name:'Nouman', rate:'$25/hr', sheet:'https://docs.google.com/spreadsheets/d/1K5UdFX4FtwRn6jUmVN3PeOc7bOGXjSL7YlCA25iNXao' },
+  { id:'asif', name:'Asif', rate:'TBD', sheet:null },
+  { id:'ahshan', name:'Ahshan', rate:'$45/hr', sheet:'https://docs.google.com/spreadsheets/d/1d43D2pWt-2vVp83zKvVFXTngLFeqqld4QgNFXMi4ffk' },
+  { id:'ali', name:'Ali', rate:'TBD', sheet:null }
+];
+
+const DEFAULT_DATA = {
+  customers: {
+    c1:{name:'Frank Frausto',package:'Custom upgrade',status:'Part 2 pending',employee:'TBD',drive:'https://drive.google.com/drive/folders/1r7MIDsHOxIpxzSgIzyuuGr5P0_bgQXPm',notes:''},
+    c2:{name:'Andy Watkins',package:'TBD',status:'Onboarding done',employee:'TBD',drive:'https://drive.google.com/drive/folders/1_BPbrxbhaxDZKxKNJwa5JwKxjVRQzDFv',notes:''},
+    c3:{name:'William Tan',package:'$2000 custom',status:'Agents being built',employee:'Nouman',drive:'https://drive.google.com/drive/folders/1_PlSR9Ej1ATnDnEZPv7HXlPIEEsBScKh',notes:''},
+    c4:{name:'Charles Dumont',package:'TBD',status:'Awaiting confirmation',employee:'TBD',drive:'https://drive.google.com/drive/folders/13PzRMuDlkkWGJz8bA5eLWURpFUCtfs4H',notes:''},
+    c5:{name:'Marshall',package:'Pro $399',status:'Call Mar 14',employee:'TBD',drive:'https://drive.google.com/drive/folders/14-zcapvCgzA_GaevXpbX5bELxCPXKm20',notes:''},
+    c6:{name:'Dustin',package:'Paid',status:'Setup in progress',employee:'Ahshan',drive:'https://drive.google.com/drive/folders/14L1TLGP7AZvV2_M3fr3ow2_ZQV8gRN1S',notes:''},
+    c7:{name:'Dean Cooper',package:'TBD',status:'Follow-up Mar 16',employee:'TBD',drive:'https://drive.google.com/drive/folders/1Kz3rVc07d4g_mnJgFL2QV31gSULcMgyz',notes:''},
+    c8:{name:'THF (William Agency)',package:'$2000 custom',status:'6 agents built',employee:'Nouman',drive:'https://drive.google.com/drive/folders/1eGDzFor4VJci3TTEpH8YfiYtCzOOLOYr',notes:''}
+  },
+  events: {
+    e1:{date:'2026-03-14',time:'13:00',title:'Marshall - Setup Call',client:'Marshall'},
+    e2:{date:'2026-03-16',time:'17:00',title:'Dean Cooper - Setup Follow-up',client:'Dean Cooper'}
+  },
+  projects: {},
+  todos: {
+    t1:{text:'Build proposal + superman stuff for THF group',done:false,priority:'high',due:''},
+    t2:{text:'Create a security risks video for OpenClaw',done:false,priority:'high',due:''},
+    t3:{text:'Create an OpenClaw Explained in 12 Minutes (for beginners)',done:false,priority:'medium',due:''},
+    t4:{text:'Spreadsheet organization',done:false,priority:'medium',due:''},
+    t5:{text:'Talk to Jaiden about expenses',done:false,priority:'high',due:''},
+    t6:{text:'Proposals on website',done:false,priority:'medium',due:''},
+    t7:{text:'Anthropic and Replit payment handled',done:false,priority:'high',due:''},
+    t8:{text:'Video editing',done:false,priority:'low',due:''},
+    t9:{text:'YouTube partnerships',done:false,priority:'low',due:''}
+  }
+};
+
+// Firebase sync
+dbRef.on('value', snap => {
+  const val = snap.val();
+  if (!val) {
+    dbRef.set(DEFAULT_DATA);
+    return;
+  }
+  suppressFirebaseWrite = true;
+  DATA = { customers: val.customers||{}, events: val.events||{}, projects: val.projects||{}, todos: val.todos||{} };
+  localStorage.setItem('oc-dashboard', JSON.stringify(DATA));
+  renderAll();
+  suppressFirebaseWrite = false;
+  setSyncStatus('green','Synced');
+}, err => {
+  console.error('Firebase error:', err);
+  const cached = localStorage.getItem('oc-dashboard');
+  if (cached) DATA = JSON.parse(cached);
+  else DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  renderAll();
+  setSyncStatus('red','Offline');
+});
+
+function saveData() {
+  if (suppressFirebaseWrite) return;
+  localStorage.setItem('oc-dashboard', JSON.stringify(DATA));
+  setSyncStatus('yellow','Saving...');
+  dbRef.set(DATA).then(() => setSyncStatus('green','Synced')).catch(() => setSyncStatus('red','Error'));
+}
+
+function setSyncStatus(color, text) {
+  const el = document.getElementById('sync-status');
+  el.innerHTML = `<span class="status-dot ${color}"></span> ${text}`;
+}
+
+function uid() { return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-item')[['customers','calendar','assignments','projects','todos','briefs'].indexOf(tab)].classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  if (tab === 'calendar') renderCalendar();
+}
+
+function renderAll() {
+  renderCustomers();
+  renderCalendar();
+  renderAssignments();
+  renderProjects();
+  renderTodos();
+  renderBriefs();
+}
+
+// CUSTOMERS
+function renderCustomers() {
+  const grid = document.getElementById('customers-grid');
+  const custs = DATA.customers || {};
+  grid.innerHTML = Object.entries(custs).map(([id, c]) => `
+    <div class="card">
+      <h3>${esc(c.name)}</h3>
+      <div class="card-row"><span class="label">Package</span><span class="value">${esc(c.package)}</span></div>
+      <div class="card-row"><span class="label">Status</span><span class="value"><span class="badge ${statusBadge(c.status)}">${esc(c.status)}</span></span></div>
+      <div class="card-row"><span class="label">Employee</span><span class="value">${esc(c.employee)}</span></div>
+      <div class="card-row"><a href="${esc(c.drive)}" target="_blank" class="drive-link"><i class="fas fa-folder"></i> Google Drive</a></div>
+      <div class="notes-field">
+        <label style="font-size:.8rem;color:var(--text-muted)">Notes</label>
+        <textarea onchange="updateCustomerNote('${id}',this.value)" placeholder="Add notes...">${esc(c.notes||'')}</textarea>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="editCustomer('${id}')"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-outline btn-sm" onclick="deleteItem('customers','${id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button>
+      </div>
     </div>
+  `).join('');
+}
 
-    <footer style="position:fixed;bottom:0;right:0;padding:6px 14px;font-size:0.7rem;color:#555;background:#16213e;border-top:1px solid #0f3460;border-left:1px solid #0f3460;border-radius:8px 0 0 0;">
-        Last updated: Feb 28, 2026
-    </footer>
+function statusBadge(s) {
+  s = (s||'').toLowerCase();
+  if (s.includes('done') || s.includes('built') || s.includes('paid')) return 'badge-success';
+  if (s.includes('pending') || s.includes('awaiting') || s.includes('progress')) return 'badge-warning';
+  if (s.includes('call') || s.includes('follow')) return 'badge-info';
+  return 'badge-info';
+}
 
-    <input type="file" id="import-file-input" accept=".json" onchange="importAllData(event)">
+function updateCustomerNote(id, val) { DATA.customers[id].notes = val; saveData(); }
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script>
-        const firebaseConfig = { databaseURL: "https://openclaw-dashboard-28911-default-rtdb.asia-southeast1.firebasedatabase.app" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const dbRef = db.ref('dashboard');
-        let firebaseReady = false;
-        let suppressFirebaseWrite = false;
+function editCustomer(id) {
+  const c = DATA.customers[id];
+  showModal('customer', id, c);
+}
 
-        let customers = [];
-        let todos = [];
-        let assignments = [];
-        let assignmentEmployees = [];
-        let currentCalendarDate = new Date();
+// CALENDAR
+function renderCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  const label = document.getElementById('cal-month-label');
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  label.textContent = months[calMonth] + ' ' + calYear;
+  
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+  
+  let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div class="cal-header">${d}</div>`).join('');
+  
+  const prevDays = new Date(calYear, calMonth, 0).getDate();
+  for (let i = firstDay - 1; i >= 0; i--) html += `<div class="cal-day other-month"><div class="day-num">${prevDays - i}</div></div>`;
+  
+  const events = Object.values(DATA.events || {});
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===d;
+    const dayEvents = events.filter(e => e.date === dateStr);
+    html += `<div class="cal-day${isToday?' today':''}" onclick="showModal('event',null,{date:'${dateStr}'})">
+      <div class="day-num">${d}</div>
+      ${dayEvents.map(e => `<div class="cal-event" title="${esc(e.title)}">${esc(e.time)} ${esc(e.title)}</div>`).join('')}
+    </div>`;
+  }
+  const totalCells = firstDay + daysInMonth;
+  for (let i = 1; i <= (42 - totalCells); i++) html += `<div class="cal-day other-month"><div class="day-num">${i}</div></div>`;
+  
+  grid.innerHTML = html;
+}
 
-        function init() {
-            loadData();
-            loadFolderNotes();
-            renderCustomers();
-            renderTodos();
-            renderCalendar();
-            renderAssignments();
-            renderFolders();
-            setupNavigation();
-            setupForms();
-        }
+function changeMonth(dir) { calMonth += dir; if (calMonth > 11) { calMonth = 0; calYear++; } if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
 
-        function loadData() {
-            const sc = localStorage.getItem('customers');
-            if (sc) {
-                customers = JSON.parse(sc).map(c => ({ id: c.id, name: c.name || '', callDate: c.callDate || '', notes: c.notes || '' }));
-            }
-            const st = localStorage.getItem('todos');
-            if (st) todos = JSON.parse(st);
-            const sa = localStorage.getItem('assignments');
-            if (sa) assignments = JSON.parse(sa);
-            const sae = localStorage.getItem('assignmentEmployees');
-            assignmentEmployees = sae ? JSON.parse(sae) : ['Ty', 'Jaiden'];
-            updateAssigneeFilter();
-        }
+// ASSIGNMENTS
+function renderAssignments() {
+  const empSection = document.getElementById('employees-section');
+  empSection.innerHTML = '<div class="cards">' + EMPLOYEES.map(e => `
+    <div class="employee-card">
+      <h3><i class="fas fa-user"></i> ${e.name}</h3>
+      <div class="card-row"><span class="label">Rate</span><span class="value">${e.rate}</span></div>
+      ${e.sheet ? `<a href="${e.sheet}" target="_blank" class="drive-link"><i class="fas fa-clock"></i> Time Tracking</a>` : '<span style="font-size:.8rem;color:var(--text-muted)">No timesheet</span>'}
+      <div style="margin-top:8px;font-size:.8rem;color:var(--text-muted)">Clients: ${Object.values(DATA.customers||{}).filter(c=>(c.employee||'').toLowerCase()===e.name.toLowerCase()).map(c=>c.name).join(', ')||'None'}</div>
+    </div>
+  `).join('') + '</div>';
 
-        function saveCustomers() { localStorage.setItem('customers', JSON.stringify(customers)); syncToCloud(); }
-        function saveTodos() { localStorage.setItem('todos', JSON.stringify(todos)); syncToCloud(); }
-        function saveAssignments() { localStorage.setItem('assignments', JSON.stringify(assignments)); localStorage.setItem('assignmentEmployees', JSON.stringify(assignmentEmployees)); syncToCloud(); }
+  const tbody = document.getElementById('assignments-tbody');
+  tbody.innerHTML = Object.entries(DATA.customers||{}).map(([id,c]) => `
+    <tr>
+      <td>${esc(c.name)}</td>
+      <td>
+        <select onchange="assignEmployee('${id}',this.value)" style="width:auto">
+          <option value="TBD" ${c.employee==='TBD'?'selected':''}>TBD</option>
+          ${EMPLOYEES.map(e=>`<option value="${e.name}" ${c.employee===e.name?'selected':''}>${e.name}</option>`).join('')}
+        </select>
+      </td>
+      <td><span class="badge ${c.employee!=='TBD'?'badge-success':'badge-warning'}">${c.employee!=='TBD'?'Assigned':'Unassigned'}</span></td>
+    </tr>
+  `).join('');
+}
 
-        // Firebase
-        function getAllData() {
-            return { customers, todos, assignments, assignmentEmployees, folderNotes, updatedAt: Date.now() };
-        }
-        function applyData(data) {
-            if (data.customers) { customers = data.customers; localStorage.setItem('customers', JSON.stringify(customers)); }
-            if (data.todos) { todos = data.todos; localStorage.setItem('todos', JSON.stringify(todos)); }
-            if (data.assignments) { assignments = data.assignments; localStorage.setItem('assignments', JSON.stringify(assignments)); }
-            if (data.assignmentEmployees) { assignmentEmployees = data.assignmentEmployees; localStorage.setItem('assignmentEmployees', JSON.stringify(assignmentEmployees)); }
-            if (data.folderNotes) { folderNotes = data.folderNotes; localStorage.setItem('folderNotes', JSON.stringify(folderNotes)); }
-        }
-        function syncToCloud() {
-            if (!firebaseReady || suppressFirebaseWrite) return;
-            dbRef.set(getAllData()).catch(err => console.error('Firebase write error:', err));
-        }
-        dbRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (!data || !data.updatedAt) { firebaseReady = true; syncToCloud(); return; }
-            firebaseReady = true;
-            suppressFirebaseWrite = true;
-            applyData(data);
-            renderCustomers(); renderTodos(); renderCalendar(); renderAssignments(); renderFolders();
-            suppressFirebaseWrite = false;
-        });
+function assignEmployee(cid, emp) { DATA.customers[cid].employee = emp; saveData(); }
 
-        // Navigation
-        function setupNavigation() {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                if (item.dataset.view) {
-                    item.addEventListener('click', () => {
-                        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                        item.classList.add('active');
-                        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                        document.getElementById(item.dataset.view).classList.add('active');
-                        if (item.dataset.view === 'calendar') renderCalendar();
-                        if (item.dataset.view === 'assignments') renderAssignments();
-                        if (item.dataset.view === 'folders') renderFolders();
-                    });
-                }
-            });
-        }
+// PROJECTS
+function renderProjects() {
+  const grid = document.getElementById('projects-grid');
+  const projs = DATA.projects || {};
+  if (!Object.keys(projs).length) {
+    grid.innerHTML = '<p style="color:var(--text-muted)">No projects yet. Click "Add Project" to create one.</p>';
+    return;
+  }
+  grid.innerHTML = Object.entries(projs).map(([id, p]) => `
+    <div class="card">
+      <h3>${esc(p.name)}</h3>
+      <div class="card-row"><span class="label">Client</span><span class="value">${esc(p.client)}</span></div>
+      <div class="card-row"><span class="label">Step</span><span class="value">${esc(p.step)}</span></div>
+      <div class="card-row"><span class="label">Status</span>
+        <select onchange="updateProject('${id}','status',this.value)" style="width:auto">
+          ${['Not Started','In Progress','Blocked','Complete'].map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="notes-field"><label style="font-size:.8rem;color:var(--text-muted)">Notes</label>
+        <textarea onchange="updateProject('${id}','notes',this.value)">${esc(p.notes||'')}</textarea>
+      </div>
+      <div style="margin-top:10px"><button class="btn btn-outline btn-sm" onclick="deleteItem('projects','${id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button></div>
+    </div>
+  `).join('');
+}
 
-        // === CUSTOMERS ===
-        function renderCustomers() {
-            const search = document.getElementById('customer-search').value.toLowerCase();
-            const filtered = customers.filter(c => c.name.toLowerCase().includes(search) || (c.notes||'').toLowerCase().includes(search));
-            document.getElementById('customers-tbody').innerHTML = filtered.map(c => `
-                <tr>
-                    <td>${c.name}</td>
-                    <td>${c.callDate ? new Date(c.callDate).toLocaleString() : 'TBD'}</td>
-                    <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;">${c.notes||''}</td>
-                    <td style="white-space:nowrap;">
-                        <button class="btn btn-secondary btn-sm" onclick="editCustomer(${c.id})">✏️</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteCustomer(${c.id})">🗑️</button>
-                    </td>
-                </tr>`).join('');
-        }
-        function showAddCustomer() {
-            document.getElementById('customer-modal-title').textContent = 'Add Customer';
-            document.getElementById('customer-form').reset();
-            document.getElementById('customer-id').value = '';
-            openModal('customer-modal');
-        }
-        function editCustomer(id) {
-            const c = customers.find(x => x.id === id); if (!c) return;
-            document.getElementById('customer-modal-title').textContent = 'Edit Customer';
-            document.getElementById('customer-id').value = c.id;
-            document.getElementById('customer-name').value = c.name;
-            document.getElementById('customer-calldate').value = c.callDate || '';
-            document.getElementById('customer-notes').value = c.notes || '';
-            openModal('customer-modal');
-        }
-        function deleteCustomer(id) {
-            if (!confirm('Delete this customer?')) return;
-            customers = customers.filter(c => c.id !== id);
-            saveCustomers(); renderCustomers(); renderCalendar();
-            showToast('Customer deleted', 'success');
-        }
-        function exportCustomersCSV() {
-            const csv = ['Name,Time,Notes', ...customers.map(c => `"${(c.name||'').replace(/"/g,'""')}","${c.callDate||''}","${(c.notes||'').replace(/"/g,'""')}"`)] .join('\n');
-            downloadBlob(csv, 'customers.csv', 'text/csv');
-            showToast('Exported CSV', 'success');
-        }
+function updateProject(id, field, val) { DATA.projects[id][field] = val; saveData(); }
 
-        // === TODOS ===
-        function renderTodos() {
-            const fu = document.getElementById('todo-filter-urgency').value;
-            const fa = document.getElementById('todo-filter-assignee').value;
-            let filtered = todos;
-            if (fu) filtered = filtered.filter(t => t.urgency === fu);
-            if (fa) filtered = filtered.filter(t => t.assignee === fa);
-            const uo = {'🔴 Critical':0,'🟡 High':1,'🔵 Medium':2,'⚪ Low':3};
-            filtered.sort((a,b) => { if (a.done !== b.done) return a.done?1:-1; return (uo[a.urgency]||4)-(uo[b.urgency]||4); });
-            document.getElementById('todos-tbody').innerHTML = filtered.map(t => `
-                <tr style="${t.done?'opacity:0.5;text-decoration:line-through;':''}">
-                    <td><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodoDone(${t.id})"></td>
-                    <td>${t.urgency}</td>
-                    <td>${t.task}</td>
-                    <td>${t.assignee}</td>
-                    <td>${t.dueDate||'-'}</td>
-                    <td><span style="padding:0.25rem 0.75rem;border-radius:4px;background:${t.status==='Done'?'#1a472a':t.status==='In Progress'?'#0f3460':t.status==='Blocked'?'#5c1a1a':'#2a2a3e'};font-size:0.875rem;">${t.status}</span></td>
-                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${t.notes||'-'}</td>
-                    <td style="white-space:nowrap;">
-                        <button class="btn btn-secondary btn-sm" onclick="editTodo(${t.id})">✏️</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteTodo(${t.id})">🗑️</button>
-                    </td>
-                </tr>`).join('');
-        }
-        function showAddTodo() {
-            document.getElementById('todo-modal-title').textContent = 'Add Task';
-            document.getElementById('todo-form').reset();
-            document.getElementById('todo-id').value = '';
-            openModal('todo-modal');
-        }
-        function editTodo(id) {
-            const t = todos.find(x => x.id === id); if (!t) return;
-            document.getElementById('todo-modal-title').textContent = 'Edit Task';
-            document.getElementById('todo-id').value = t.id;
-            document.getElementById('todo-task').value = t.task;
-            document.getElementById('todo-urgency').value = t.urgency;
-            document.getElementById('todo-assignee').value = t.assignee;
-            document.getElementById('todo-due-date').value = t.dueDate;
-            document.getElementById('todo-status').value = t.status;
-            document.getElementById('todo-notes').value = t.notes;
-            openModal('todo-modal');
-        }
-        function saveTodo(e) {
-            e.preventDefault();
-            const id = document.getElementById('todo-id').value;
-            const todo = {
-                id: id ? parseInt(id) : Date.now(),
-                task: document.getElementById('todo-task').value,
-                urgency: document.getElementById('todo-urgency').value,
-                assignee: document.getElementById('todo-assignee').value,
-                dueDate: document.getElementById('todo-due-date').value,
-                status: document.getElementById('todo-status').value,
-                notes: document.getElementById('todo-notes').value,
-                done: id ? (todos.find(t=>t.id===parseInt(id))?.done||false) : false
-            };
-            if (id) { const idx = todos.findIndex(t=>t.id===parseInt(id)); todos[idx]=todo; }
-            else todos.push(todo);
-            saveTodos(); renderTodos(); renderCalendar(); closeModal('todo-modal');
-            showToast(id?'Task updated!':'Task added!');
-        }
-        function deleteTodo(id) {
-            if (!confirm('Delete this task?')) return;
-            todos = todos.filter(t=>t.id!==id);
-            saveTodos(); renderTodos(); renderCalendar();
-            showToast('Task deleted');
-        }
-        function toggleTodoDone(id) {
-            const t = todos.find(x=>x.id===id);
-            if (t) { t.done=!t.done; if(t.done) t.status='Done'; saveTodos(); renderTodos(); }
-        }
-        function updateAssigneeFilter() {
-            const names = [...new Set(todos.map(t=>t.assignee).filter(Boolean))];
-            const sel = document.getElementById('todo-filter-assignee');
-            sel.innerHTML = '<option value="">All Assignees</option>' + names.map(n=>`<option value="${n}">${n}</option>`).join('');
-        }
+// TODOS
+function renderTodos() {
+  const list = document.getElementById('todos-list');
+  const todos = DATA.todos || {};
+  const sorted = Object.entries(todos).sort((a,b) => {
+    if (a[1].done !== b[1].done) return a[1].done ? 1 : -1;
+    const p = {high:0,medium:1,low:2};
+    return (p[a[1].priority]||1) - (p[b[1].priority]||1);
+  });
+  list.innerHTML = sorted.map(([id, t]) => `
+    <div class="todo-item ${t.done?'done':''}">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo('${id}')">
+      <span class="todo-text">${esc(t.text)}</span>
+      <div class="todo-meta">
+        <select onchange="updateTodoPriority('${id}',this.value)" style="width:auto;padding:3px 8px">
+          ${['high','medium','low'].map(p=>`<option value="${p}" ${t.priority===p?'selected':''}>${p}</option>`).join('')}
+        </select>
+        <input type="date" value="${t.due||''}" onchange="updateTodoDue('${id}',this.value)" style="width:auto;padding:3px 8px">
+        <button class="btn btn-outline btn-sm" onclick="deleteItem('todos','${id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
 
-        // === CALENDAR ===
-        function renderCalendar() {
-            const year = currentCalendarDate.getFullYear(), month = currentCalendarDate.getMonth();
-            document.getElementById('calendar-month-year').textContent = currentCalendarDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-            const startDay = new Date(year,month,1).getDay();
-            const daysInMonth = new Date(year,month+1,0).getDate();
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
-                const h = document.createElement('div'); h.className='calendar-day-header'; h.textContent=d; grid.appendChild(h);
-            });
-            const prevDays = new Date(year,month,0).getDate();
-            for (let i=startDay-1;i>=0;i--) { const d=document.createElement('div'); d.className='calendar-day other-month'; d.innerHTML=`<div class="calendar-day-number">${prevDays-i}</div>`; grid.appendChild(d); }
-            for (let i=1;i<=daysInMonth;i++) {
-                const d=document.createElement('div'); d.className='calendar-day';
-                const date=new Date(year,month,i); const events=getEventsForDate(date);
-                d.innerHTML=`<div class="calendar-day-number">${i}</div>${events.map(e=>`<div class="calendar-event ${e.type}">${e.text}</div>`).join('')}`;
-                if(events.length){d.style.cursor='pointer';d.onclick=()=>showDayDetail(date,events);}
-                grid.appendChild(d);
-            }
-            const rem=42-(startDay+daysInMonth);
-            for(let i=1;i<=rem;i++){const d=document.createElement('div');d.className='calendar-day other-month';d.innerHTML=`<div class="calendar-day-number">${i}</div>`;grid.appendChild(d);}
-        }
-        function getEventsForDate(date) {
-            const events=[];
-            const ds=date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
-            customers.forEach(c=>{if(c.callDate){const cd=new Date(c.callDate);const cds=cd.getFullYear()+'-'+String(cd.getMonth()+1).padStart(2,'0')+'-'+String(cd.getDate()).padStart(2,'0');if(cds===ds){events.push({type:'customer',text:`${cd.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})} - ${c.name}`});}}});
-            todos.forEach(t=>{if(t.dueDate===ds&&!t.done){events.push({type:'todo',text:`📋 ${t.task}`});}});
-            return events;
-        }
-        function showDayDetail(date,events) {
-            const dateStr=date.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-            const html=events.map(e=>`<div style="padding:10px;margin:8px 0;border-radius:8px;background:${e.type==='customer'?'#0f3460':'#4a3000'};border-left:4px solid ${e.type==='customer'?'#4a90d9':'#ff9800'};"><strong>${e.text}</strong><div style="font-size:0.85rem;color:#aaa;margin-top:4px;">${e.type==='customer'?'Customer':'To-Do'}</div></div>`).join('');
-            let modal=document.getElementById('day-detail-modal');
-            if(!modal){modal=document.createElement('div');modal.id='day-detail-modal';modal.className='modal';modal.innerHTML=`<div class="modal-content" style="max-width:500px"><span class="close-modal" onclick="closeModal('day-detail-modal')">&times;</span><h2 id="day-detail-title"></h2><div id="day-detail-events"></div></div>`;document.body.appendChild(modal);}
-            document.getElementById('day-detail-title').textContent='📅 '+dateStr;
-            document.getElementById('day-detail-events').innerHTML=html;
-            openModal('day-detail-modal');
-        }
-        function changeMonth(d){currentCalendarDate.setMonth(currentCalendarDate.getMonth()+d);renderCalendar();}
-        function goToToday(){currentCalendarDate=new Date();renderCalendar();}
+function toggleTodo(id) { DATA.todos[id].done = !DATA.todos[id].done; saveData(); }
+function updateTodoPriority(id,v) { DATA.todos[id].priority = v; saveData(); }
+function updateTodoDue(id,v) { DATA.todos[id].due = v; saveData(); }
 
-        // === FORMS SETUP ===
-        function setupForms() {
-            document.getElementById('customer-search').addEventListener('input', renderCustomers);
-            document.getElementById('customer-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const id=document.getElementById('customer-id').value;
-                const c={id:id?parseInt(id):Date.now(),name:document.getElementById('customer-name').value,callDate:document.getElementById('customer-calldate').value,notes:document.getElementById('customer-notes').value};
-                if(id){const idx=customers.findIndex(x=>x.id===parseInt(id));customers[idx]=c;}else customers.push(c);
-                saveCustomers();renderCustomers();renderCalendar();closeModal('customer-modal');showToast('Customer saved','success');
-            });
-            document.getElementById('assignment-form').addEventListener('submit', saveAssignment);
-        }
+// BRIEFS
+function renderBriefs() {
+  const grid = document.getElementById('briefs-grid');
+  grid.innerHTML = Object.values(DATA.customers||{}).map(c => `
+    <div class="card" style="text-align:center">
+      <h3>${esc(c.name)}</h3>
+      <p style="color:var(--text-muted);margin:10px 0;font-size:.85rem">${esc(c.package)}</p>
+      <a href="${esc(c.drive)}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-folder-open"></i> View Brief</a>
+    </div>
+  `).join('');
+}
 
-        // === SORT ===
-        let sortDirection={};
-        function sortTable(table,field) {
-            const key=`${table}-${field}`; sortDirection[key]=!sortDirection[key];
-            const data=table==='customers'?customers:todos;
-            data.sort((a,b)=>{let av=a[field]||'',bv=b[field]||'';if(typeof av==='string')av=av.toLowerCase();if(typeof bv==='string')bv=bv.toLowerCase();if(av<bv)return sortDirection[key]?-1:1;if(av>bv)return sortDirection[key]?1:-1;return 0;});
-            if(table==='customers')renderCustomers();if(table==='todos')renderTodos();
-        }
+// MODALS
+function showModal(type, id, prefill) {
+  const overlay = document.getElementById('modal-overlay');
+  const body = document.getElementById('modal-body');
+  let html = '';
 
-        // === EXPORT/IMPORT ALL ===
-        function exportAllData() {
-            const json=JSON.stringify({customers,todos,assignments,assignmentEmployees,folderNotes,exportDate:new Date().toISOString()},null,2);
-            downloadBlob(json,`openclaw-dashboard-backup-${new Date().toISOString().split('T')[0]}.json`,'application/json');
-            showToast('All data exported','success');
-        }
-        function importAllData(event) {
-            const file=event.target.files[0]; if(!file) return;
-            const reader=new FileReader();
-            reader.onload=(e)=>{
-                try{
-                    const data=JSON.parse(e.target.result);
-                    if(confirm('This will replace all current data. Continue?')){
-                        if(data.customers)customers=data.customers;
-                        if(data.todos){todos=data.todos;localStorage.setItem('todos',JSON.stringify(todos));}
-                        if(data.assignments){assignments=data.assignments;localStorage.setItem('assignments',JSON.stringify(assignments));}
-                        if(data.assignmentEmployees){assignmentEmployees=data.assignmentEmployees;localStorage.setItem('assignmentEmployees',JSON.stringify(assignmentEmployees));}
-                        if(data.folderNotes){folderNotes=data.folderNotes;localStorage.setItem('folderNotes',JSON.stringify(folderNotes));}
-                        saveCustomers();renderCustomers();renderTodos();renderCalendar();renderAssignments();renderFolders();updateAssigneeFilter();
-                        showToast('Data imported','success');
-                    }
-                }catch(err){showToast('Import error: '+err.message,'error');}
-            };
-            reader.readAsText(file); event.target.value='';
-        }
+  if (type === 'customer') {
+    const c = prefill || {name:'',package:'',status:'',employee:'TBD',drive:'',notes:''};
+    html = `<h2>${id?'Edit':'Add'} Customer</h2>
+      <div class="form-group"><label>Name</label><input id="m-name" value="${esc(c.name)}"></div>
+      <div class="form-group"><label>Package</label><input id="m-package" value="${esc(c.package)}"></div>
+      <div class="form-group"><label>Status</label><input id="m-status" value="${esc(c.status)}"></div>
+      <div class="form-group"><label>Employee</label>
+        <select id="m-employee"><option value="TBD">TBD</option>${EMPLOYEES.map(e=>`<option value="${e.name}" ${c.employee===e.name?'selected':''}>${e.name}</option>`).join('')}</select>
+      </div>
+      <div class="form-group"><label>Google Drive URL</label><input id="m-drive" value="${esc(c.drive)}"></div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCustomer('${id||''}')">Save</button>
+      </div>`;
+  } else if (type === 'event') {
+    const e = prefill || {date:'',time:'',title:'',client:''};
+    html = `<h2>Add Event</h2>
+      <div class="form-group"><label>Date</label><input type="date" id="m-date" value="${e.date||''}"></div>
+      <div class="form-group"><label>Time</label><input type="time" id="m-time" value="${e.time||''}"></div>
+      <div class="form-group"><label>Title</label><input id="m-title" value="${esc(e.title||'')}"></div>
+      <div class="form-group"><label>Client</label><input id="m-client" value="${esc(e.client||'')}"></div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEvent()">Save</button>
+      </div>`;
+  } else if (type === 'project') {
+    html = `<h2>Add Project</h2>
+      <div class="form-group"><label>Project Name</label><input id="m-pname"></div>
+      <div class="form-group"><label>Client</label>
+        <select id="m-pclient"><option value="">Select...</option>${Object.values(DATA.customers||{}).map(c=>`<option>${c.name}</option>`).join('')}</select>
+      </div>
+      <div class="form-group"><label>Current Step</label><input id="m-pstep"></div>
+      <div class="form-group"><label>Status</label>
+        <select id="m-pstatus"><option>Not Started</option><option>In Progress</option><option>Blocked</option><option>Complete</option></select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProject()">Save</button>
+      </div>`;
+  } else if (type === 'todo') {
+    html = `<h2>Add Task</h2>
+      <div class="form-group"><label>Task</label><input id="m-ttext"></div>
+      <div class="form-group"><label>Priority</label>
+        <select id="m-tpriority"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select>
+      </div>
+      <div class="form-group"><label>Due Date</label><input type="date" id="m-tdue"></div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTodo()">Save</button>
+      </div>`;
+  }
+  body.innerHTML = html;
+  overlay.classList.add('show');
+}
 
-        // === UTILITIES ===
-        function openModal(id){document.getElementById(id).classList.add('active');}
-        function closeModal(id){document.getElementById(id).classList.remove('active');}
-        function showToast(msg,type='success'){const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
-        function downloadBlob(content,filename,type){const b=new Blob([content],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=filename;a.click();URL.revokeObjectURL(u);}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
 
-        // ===== ASSIGNMENTS =====
-        function renderAssignments() {
-            const assignedCustomerIds = assignments.map(a => a.customerId);
-            const unassigned = customers.filter(c => !assignedCustomerIds.includes(c.id));
-            const container = document.getElementById('unassigned-customers');
-            if (container) {
-                container.innerHTML = unassigned.length === 0 ? '<div style="color:#888;text-align:center;padding:1rem;">All customers assigned</div>' :
-                    unassigned.map(c => {
-                        const safeName = c.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-                        return `<div class="drag-card" draggable="true" ondragstart="onDragStart(event, ${c.id}, '${safeName}', '${c.callDate||''}')">${safeName}${c.callDate ? ' <span style="color:#888;font-size:0.8rem;">'+new Date(c.callDate).toLocaleString()+'</span>' : ''}</div>`;
-                    }).join('');
-            }
-            const zones = document.getElementById('employees-drop-zones');
-            if (zones) {
-                zones.innerHTML = assignmentEmployees.map(emp => {
-                    const empAssignments = assignments.filter(a => a.employeeName === emp);
-                    return `<div class="employee-section">
-                        <div class="employee-header"><h4>${emp}</h4><span class="employee-remove" onclick="removeAssignmentEmployee('${emp}')">remove</span></div>
-                        <div class="drop-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, '${emp}')" data-employee="${emp}">
-                            ${empAssignments.length === 0 ? '<div style="color:#666;text-align:center;font-size:0.85rem;">Drop customers here</div>' :
-                            empAssignments.map(a => `<div class="assigned-card">
-                                <div><strong>${a.customerName}</strong><br><span style="color:#888;font-size:0.8rem;">${a.callTime ? new Date(a.callTime).toLocaleString() : 'No time set'}</span>${a.goals ? '<br><span style="font-size:0.8rem;color:#aaa;">'+a.goals+'</span>' : ''}</div>
-                                <span class="remove-btn" onclick="removeAssignment(${a.id})">❌</span>
-                            </div>`).join('')}
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-        }
+function saveCustomer(id) {
+  const c = {
+    name: document.getElementById('m-name').value,
+    package: document.getElementById('m-package').value,
+    status: document.getElementById('m-status').value,
+    employee: document.getElementById('m-employee').value,
+    drive: document.getElementById('m-drive').value,
+    notes: id ? (DATA.customers[id]?.notes||'') : ''
+  };
+  DATA.customers[id || uid()] = c;
+  saveData(); closeModal();
+}
 
-        let dragData = {};
-        function onDragStart(e, customerId, customerName, callDate) {
-            const c = customers.find(x => x.id === customerId);
-            dragData = { customerId, customerName: c ? c.name : customerName, callDate };
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', String(customerId));
-        }
-        function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-        function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
-        function onDrop(e, employeeName) {
-            e.preventDefault(); e.currentTarget.classList.remove('drag-over');
-            document.getElementById('assign-customer-id').value = dragData.customerId;
-            document.getElementById('assign-customer-name').value = dragData.customerName;
-            document.getElementById('assign-employee-name').value = employeeName;
-            document.getElementById('assign-employee-display').value = employeeName;
-            document.getElementById('assign-call-time').value = dragData.callDate || '';
-            document.getElementById('assign-goals').value = '';
-            openModal('assignment-modal');
-        }
-        function saveAssignment(e) {
-            e.preventDefault();
-            assignments.push({
-                id: Date.now(),
-                customerId: parseInt(document.getElementById('assign-customer-id').value),
-                customerName: document.getElementById('assign-customer-name').value,
-                employeeName: document.getElementById('assign-employee-name').value,
-                callTime: document.getElementById('assign-call-time').value,
-                goals: document.getElementById('assign-goals').value
-            });
-            saveAssignments(); closeModal('assignment-modal'); renderAssignments(); showToast('Customer assigned!');
-        }
-        function removeAssignment(id) { assignments = assignments.filter(a => a.id !== id); saveAssignments(); renderAssignments(); showToast('Unassigned'); }
-        function addAssignmentEmployee() {
-            const name = prompt('Employee name:'); if (!name || !name.trim()) return;
-            if (assignmentEmployees.includes(name.trim())) { showToast('Already exists', 'error'); return; }
-            assignmentEmployees.push(name.trim()); saveAssignments(); renderAssignments(); showToast('Employee added');
-        }
-        function removeAssignmentEmployee(name) {
-            if (!confirm(`Remove ${name}? Their assignments will also be removed.`)) return;
-            assignmentEmployees = assignmentEmployees.filter(e => e !== name);
-            assignments = assignments.filter(a => a.employeeName !== name);
-            saveAssignments(); renderAssignments(); showToast('Employee removed');
-        }
+function saveEvent() {
+  DATA.events[uid()] = {
+    date: document.getElementById('m-date').value,
+    time: document.getElementById('m-time').value,
+    title: document.getElementById('m-title').value,
+    client: document.getElementById('m-client').value
+  };
+  saveData(); closeModal();
+}
 
-        // === CLIENT FOLDERS ===
-        let folderNotes = {}; // { customerId: [{ id, text, createdAt }] }
-        let currentFolderId = null;
+function saveProject() {
+  DATA.projects[uid()] = {
+    name: document.getElementById('m-pname').value,
+    client: document.getElementById('m-pclient').value,
+    step: document.getElementById('m-pstep').value,
+    status: document.getElementById('m-pstatus').value,
+    notes: ''
+  };
+  saveData(); closeModal();
+}
 
-        function loadFolderNotes() {
-            const saved = localStorage.getItem('folderNotes');
-            if (saved) folderNotes = JSON.parse(saved);
-        }
-        function saveFolderNotes() { localStorage.setItem('folderNotes', JSON.stringify(folderNotes)); syncToCloud(); }
+function saveTodo() {
+  DATA.todos[uid()] = {
+    text: document.getElementById('m-ttext').value,
+    done: false,
+    priority: document.getElementById('m-tpriority').value,
+    due: document.getElementById('m-tdue').value
+  };
+  saveData(); closeModal();
+}
 
-        function renderFolders() {
-            const grid = document.getElementById('folders-grid');
-            if (!grid) return;
-            if (customers.length === 0) {
-                grid.innerHTML = '<p style="color:#888;text-align:center;padding:2rem;">No customers yet. Add one in the Customers tab!</p>';
-                return;
-            }
-            grid.innerHTML = customers.map(c => {
-                const noteCount = (folderNotes[c.id] || []).length;
-                return `<div class="folder-card" onclick="openFolder(${c.id})">
-                    <div class="folder-icon">📁</div>
-                    <div class="folder-name">${c.name}</div>
-                    <div class="folder-meta">${noteCount} note${noteCount!==1?'s':''}</div>
-                </div>`;
-            }).join('');
-        }
+function deleteItem(collection, id) {
+  if (!confirm('Delete this item?')) return;
+  delete DATA[collection][id];
+  saveData();
+}
 
-        function openFolder(customerId) {
-            currentFolderId = customerId;
-            const c = customers.find(x => x.id === customerId);
-            if (!c) return;
-            document.getElementById('folder-detail-name').textContent = '📁 ' + c.name;
-            document.getElementById('folder-detail-time').textContent = c.callDate ? new Date(c.callDate).toLocaleString() : 'Not set';
-            document.getElementById('folder-detail-customer-notes').textContent = c.notes || 'None';
-            document.getElementById('folder-new-note').value = '';
-            renderFolderNotes();
-            // Switch to folder-detail view
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById('folder-detail').classList.add('active');
-        }
-
-        function closeFolderDetail() {
-            currentFolderId = null;
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById('folders').classList.add('active');
-            renderFolders();
-        }
-
-        function renderFolderNotes() {
-            const notes = (folderNotes[currentFolderId] || []).sort((a,b) => b.createdAt.localeCompare(a.createdAt));
-            const list = document.getElementById('folder-notes-list');
-            if (notes.length === 0) {
-                list.innerHTML = '<p style="color:#666;">No internal notes yet.</p>';
-                return;
-            }
-            list.innerHTML = notes.map(n => `<div class="note-card">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <div class="note-time">${new Date(n.createdAt).toLocaleString()}</div>
-                    <span style="cursor:pointer;color:#888;font-size:0.8rem;" onclick="deleteFolderNote(${currentFolderId},${n.id})">🗑️</span>
-                </div>
-                <div class="note-text">${n.text}</div>
-            </div>`).join('');
-        }
-
-        function addFolderNote() {
-            const text = document.getElementById('folder-new-note').value.trim();
-            if (!text) return;
-            if (!folderNotes[currentFolderId]) folderNotes[currentFolderId] = [];
-            folderNotes[currentFolderId].push({ id: Date.now(), text, createdAt: new Date().toISOString() });
-            saveFolderNotes();
-            document.getElementById('folder-new-note').value = '';
-            renderFolderNotes();
-            showToast('Note added');
-        }
-
-        function deleteFolderNote(customerId, noteId) {
-            if (!confirm('Delete this note?')) return;
-            folderNotes[customerId] = (folderNotes[customerId]||[]).filter(n => n.id !== noteId);
-            saveFolderNotes(); renderFolderNotes();
-            showToast('Note deleted');
-        }
-
-        window.addEventListener('DOMContentLoaded', init);
-    </script>
+function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+</script>
 </body>
 </html>
