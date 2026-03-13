@@ -53,14 +53,14 @@ textarea{resize:vertical;min-height:60px}
 .form-group{margin-bottom:15px}
 .form-group label{display:block;margin-bottom:5px;font-size:.85rem;color:var(--text-muted)}
 .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:15px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:15px;overflow-x:auto}
 .cal-header{padding:8px;text-align:center;font-size:.8rem;color:var(--text-muted);font-weight:600}
 .cal-day{background:var(--card);border:1px solid var(--border);padding:8px;min-height:80px;border-radius:6px;font-size:.8rem;cursor:pointer;transition:background .2s}
 .cal-day:hover{background:var(--card-hover)}
 .cal-day .day-num{font-weight:600;margin-bottom:4px}
 .cal-day.other-month{opacity:.3}
 .cal-day.today{border-color:var(--primary)}
-.cal-event{background:rgba(108,92,231,.2);color:var(--primary);padding:2px 4px;border-radius:3px;margin-bottom:2px;font-size:.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-event{background:rgba(108,92,231,.2);color:var(--primary);padding:2px 4px;border-radius:3px;margin-bottom:2px;font-size:.7rem;white-space:normal;word-break:break-word}
 .cal-nav{display:flex;align-items:center;gap:15px;margin-bottom:10px}
 .cal-nav h2{font-size:1.2rem;min-width:200px}
 .assignment-table{width:100%;border-collapse:collapse;margin-top:15px}
@@ -374,7 +374,9 @@ function renderCalendar() {
     </div>`;
   }
   const totalCells = firstDay + daysInMonth;
-  for (let i = 1; i <= (42 - totalCells); i++) html += `<div class="cal-day other-month"><div class="day-num">${i}</div></div>`;
+  const rows = Math.ceil(totalCells / 7);
+  const targetCells = rows * 7;
+  for (let i = 1; i <= (targetCells - totalCells); i++) html += `<div class="cal-day other-month"><div class="day-num">${i}</div></div>`;
   
   grid.innerHTML = html;
 }
@@ -428,15 +430,56 @@ function renderProjects() {
           ${['Not Started','In Progress','Blocked','Complete'].map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </div>
-      <div class="notes-field"><label style="font-size:.8rem;color:var(--text-muted)">Notes</label>
-        <textarea onchange="updateProject('${id}','notes',this.value)">${esc(p.notes||'')}</textarea>
+      <div style="margin-top:10px;font-size:.83rem;color:var(--text-muted);max-height:60px;overflow:hidden" id="pnotes-${id}">${esc(p.notes||'No notes').substring(0,100)}${(p.notes||'').length > 100 ? '...' : ''}</div>
+      ${(p.notes||'').length > 100 ? `<button class="meeting-toggle" onclick="toggleProjectNotes('${id}','${esc(p.notes||'').replace(/'/g,"\\'")}')">▼ View All Notes</button>` : ''}
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="editProject('${id}')"><i class="fas fa-edit"></i> Edit</button>
+        <button class="btn btn-outline btn-sm" onclick="deleteItem('projects','${id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button>
       </div>
-      <div style="margin-top:10px"><button class="btn btn-outline btn-sm" onclick="deleteItem('projects','${id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button></div>
     </div>
   `).join('');
 }
 
 function updateProject(id, field, val) { DATA.projects[id][field] = val; saveData(); }
+function toggleProjectNotes(id, fullNotes) {
+  const el = document.getElementById('pnotes-' + id);
+  if (el.dataset.expanded === 'true') {
+    el.style.maxHeight = '60px';
+    el.textContent = fullNotes.substring(0,100) + '...';
+    el.dataset.expanded = 'false';
+    el.nextElementSibling.textContent = '▼ View All Notes';
+  } else {
+    el.style.maxHeight = 'none';
+    el.textContent = fullNotes;
+    el.dataset.expanded = 'true';
+    el.nextElementSibling.textContent = '▲ Collapse';
+  }
+}
+function editProject(id) {
+  const p = DATA.projects[id];
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `<h2>Edit Project</h2>
+    <div class="form-group"><label>Project Name</label><input id="m-pname" value="${esc(p.name)}"></div>
+    <div class="form-group"><label>Client</label><input id="m-pclient" value="${esc(p.client)}"></div>
+    <div class="form-group"><label>Current Step</label><input id="m-pstep" value="${esc(p.step)}"></div>
+    <div class="form-group"><label>Status</label>
+      <select id="m-pstatus">${['Not Started','In Progress','Blocked','Complete'].map(s=>'<option'+(p.status===s?' selected':'')+'>'+s+'</option>').join('')}</select>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="m-pnotes" rows="5">${esc(p.notes||'')}</textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="updateProjectFull('${id}')">Save</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function updateProjectFull(id) {
+  DATA.projects[id].name = document.getElementById('m-pname').value;
+  DATA.projects[id].client = document.getElementById('m-pclient').value;
+  DATA.projects[id].step = document.getElementById('m-pstep').value;
+  DATA.projects[id].status = document.getElementById('m-pstatus').value;
+  DATA.projects[id].notes = document.getElementById('m-pnotes').value;
+  saveData(); closeModal();
+}
 
 // TODOS
 function renderTodos() {
