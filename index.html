@@ -74,7 +74,7 @@ textarea{resize:vertical;min-height:60px}
 .todo-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--primary);cursor:pointer;flex-shrink:0}
 .todo-item.done .todo-text{text-decoration:line-through;opacity:.5}
 .todo-text{flex:1;font-size:.9rem}
-.todo-meta{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.todo-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;flex-wrap:wrap}
 .priority-high{color:var(--danger)}
 .priority-medium{color:var(--warning)}
 .priority-low{color:var(--success)}
@@ -799,7 +799,6 @@ function saveTodo() {
 }
 
 function deleteItem(collection, id) {
-  if (!confirm('Delete this item?')) return;
   delete DATA[collection][id];
   saveData();
 }
