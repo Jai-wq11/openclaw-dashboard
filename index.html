@@ -703,6 +703,7 @@ const CLIENT_BRIEFS = {
 
 function renderBriefs() {
   const grid = document.getElementById('briefs-grid');
+  if (!grid) return;
   grid.innerHTML = Object.entries(DATA.customers||{}).map(([id, c]) => {
     const brief = CLIENT_BRIEFS[c.name] || null;
     if (!brief) return `<div class="card"><h3>${esc(c.name)}</h3><p style="color:var(--text-muted)">No brief available</p></div>`;
