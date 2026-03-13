@@ -164,6 +164,11 @@ textarea{resize:vertical;min-height:60px}
   <div class="tab-content" id="tab-todos">
     <div class="top-bar"><h1>To-Do List</h1><button class="btn btn-primary" onclick="showModal('todo')"><i class="fas fa-plus"></i> Add Task</button></div>
     <div id="todos-list"></div>
+
+    <div style="margin-top:40px;border-top:1px solid var(--border);padding-top:20px">
+      <div class="top-bar"><h1><i class="fas fa-bell" style="margin-right:8px"></i> Reminders</h1><button class="btn btn-primary" onclick="showModal('reminder')"><i class="fas fa-plus"></i> Add Reminder</button></div>
+      <div id="reminders-list"></div>
+    </div>
   </div>
 
   <!-- MEETING BRIEFS -->
@@ -193,7 +198,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const dbRef = db.ref('dashboard');
 
-let DATA = { customers: {}, events: {}, projects: {}, todos: {} };
+let DATA = { customers: {}, events: {}, projects: {}, todos: {}, reminders: {} };
 let suppressFirebaseWrite = false;
 let calYear = 2026, calMonth = 2; // March 2026
 
@@ -255,7 +260,7 @@ dbRef.on('value', snap => {
     return;
   }
   suppressFirebaseWrite = true;
-  DATA = { customers: val.customers||{}, events: val.events||{}, projects: val.projects||{}, todos: val.todos||{} };
+  DATA = { customers: val.customers||{}, events: val.events||{}, projects: val.projects||{}, todos: val.todos||{}, reminders: val.reminders||{} };
   localStorage.setItem('oc-dashboard', JSON.stringify(DATA));
   renderAll();
   suppressFirebaseWrite = false;
@@ -300,6 +305,7 @@ function renderAll() {
   renderAssignments();
   renderProjects();
   renderTodos();
+  renderReminders();
   renderBriefs();
 }
 
@@ -592,6 +598,33 @@ function toggleTodo(id) { DATA.todos[id].done = !DATA.todos[id].done; saveData()
 function updateTodoPriority(id,v) { DATA.todos[id].priority = v; saveData(); }
 function updateTodoDue(id,v) { DATA.todos[id].due = v; saveData(); }
 
+// REMINDERS
+function renderReminders() {
+  const list = document.getElementById('reminders-list');
+  const reminders = DATA.reminders || {};
+  const sorted = Object.entries(reminders).sort((a,b) => {
+    if (a[1].done !== b[1].done) return a[1].done ? 1 : -1;
+    const da = a[1].date || '9999'; const db2 = b[1].date || '9999';
+    return da.localeCompare(db2);
+  });
+  if (!sorted.length) { list.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">No reminders yet.</p>'; return; }
+  list.innerHTML = sorted.map(([id, r]) => {
+    const isOverdue = r.date && !r.done && new Date(r.date+'T'+(r.time||'23:59')) < new Date();
+    return `<div class="todo-item ${r.done?'done':''}" style="${isOverdue?'border-color:var(--danger)':''}">
+      <input type="checkbox" ${r.done?'checked':''} onchange="toggleReminder('${id}')">
+      <span class="todo-text">
+        ${isOverdue?'<span style="color:var(--danger);font-size:.75rem;margin-right:4px">⚠ OVERDUE</span>':''}
+        ${esc(r.text)}
+      </span>
+      <div class="todo-meta">
+        ${r.date ? `<span class="badge badge-info">${esc(r.date)}${r.time?' '+esc(r.time):''}</span>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="deleteItem('reminders','${id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleReminder(id) { DATA.reminders[id].done = !DATA.reminders[id].done; saveData(); }
+
 // BRIEFS
 const CLIENT_BRIEFS = {
   'Frank Frausto': {
@@ -748,6 +781,16 @@ function showModal(type, id, prefill) {
         <button class="btn btn-primary" onclick="saveTodo()">Save</button>
       </div>`;
   }
+  if (type === 'reminder') {
+    html = `<h2><i class="fas fa-bell" style="margin-right:8px"></i> Add Reminder</h2>
+      <div class="form-group"><label>Reminder</label><input id="m-rtext" placeholder="e.g. Follow up with Marshall"></div>
+      <div class="form-group"><label>Date</label><input type="date" id="m-rdate"></div>
+      <div class="form-group"><label>Time (optional)</label><input type="time" id="m-rtime"></div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveReminder()"><i class="fas fa-bell"></i> Save</button>
+      </div>`;
+  }
   body.innerHTML = html;
   overlay.classList.add('show');
 }
@@ -794,6 +837,18 @@ function saveTodo() {
     done: false,
     priority: document.getElementById('m-tpriority').value,
     due: document.getElementById('m-tdue').value
+  };
+  saveData(); closeModal();
+}
+
+function saveReminder() {
+  const text = document.getElementById('m-rtext').value;
+  if (!text) { alert('Please enter a reminder.'); return; }
+  DATA.reminders[uid()] = {
+    text,
+    date: document.getElementById('m-rdate').value,
+    time: document.getElementById('m-rtime').value,
+    done: false
   };
   saveData(); closeModal();
 }
