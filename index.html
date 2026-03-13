@@ -430,8 +430,7 @@ function renderProjects() {
           ${['Not Started','In Progress','Blocked','Complete'].map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </div>
-      <div style="margin-top:10px;font-size:.83rem;color:var(--text-muted);max-height:60px;overflow:hidden" id="pnotes-${id}">${esc(p.notes||'No notes').substring(0,100)}${(p.notes||'').length > 100 ? '...' : ''}</div>
-      ${(p.notes||'').length > 100 ? `<button class="meeting-toggle" onclick="toggleProjectNotes('${id}','${esc(p.notes||'').replace(/'/g,"\\'")}')">▼ View All Notes</button>` : ''}
+      <div style="margin-top:10px;font-size:.83rem;color:var(--text-muted);line-height:1.6">${esc(p.notes||'No notes')}</div>
       <div style="margin-top:10px;display:flex;gap:8px">
         <button class="btn btn-outline btn-sm" onclick="editProject('${id}')"><i class="fas fa-edit"></i> Edit</button>
         <button class="btn btn-outline btn-sm" onclick="deleteItem('projects','${id}')" style="color:var(--danger)"><i class="fas fa-trash"></i></button>
